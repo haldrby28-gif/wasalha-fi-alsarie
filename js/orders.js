@@ -1,79 +1,50 @@
-
 import { db } from "../../js/firebase.js";
 
 import {
-
-collection,
-getDocs,
-doc,
-updateDoc
-
+  collection,
+  onSnapshot,
+  doc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const table=document.getElementById("ordersTable");
+const table = document.getElementById("ordersTable");
 
-async function loadOrders(){
+onSnapshot(collection(db, "orders"), (snapshot) => {
 
-table.innerHTML="";
+  table.innerHTML = "";
 
-const snapshot=await getDocs(collection(db,"orders"));
+  snapshot.forEach((order) => {
 
-snapshot.forEach(order=>{
+    const data = order.data();
 
-const data=order.data();
+    table.innerHTML += `
+      <tr>
+        <td>${order.id}</td>
+        <td>${data.userId || "-"}</td>
+        <td>${data.total || 0} جنيه</td>
 
-table.innerHTML+=`
+        <td>
+          <select onchange="changeStatus('${order.id}',this.value)">
+            <option value="pending" ${data.status=="pending"?"selected":""}>جديد</option>
+            <option value="preparing" ${data.status=="preparing"?"selected":""}>جاري التحضير</option>
+            <option value="delivery" ${data.status=="delivery"?"selected":""}>مع المندوب</option>
+            <option value="completed" ${data.status=="completed"?"selected":""}>تم التسليم</option>
+            <option value="cancelled" ${data.status=="cancelled"?"selected":""}>ملغي</option>
+          </select>
+        </td>
 
-<tr>
+        <td>✅</td>
+      </tr>
+    `;
 
-<td>${order.id}</td>
-
-<td>${data.userId}</td>
-
-<td>${data.total} جنيه</td>
-
-<td>
-
-<select onchange="changeStatus('${order.id}',this.value)">
-
-<option ${data.status=="pending"?"selected":""} value="pending">جديد</option>
-
-<option ${data.status=="preparing"?"selected":""} value="preparing">جارى التحضير</option>
-
-<option ${data.status=="delivery"?"selected":""} value="delivery">مع المندوب</option>
-
-<option ${data.status=="completed"?"selected":""} value="completed">تم التسليم</option>
-
-<option ${data.status=="cancelled"?"selected":""} value="cancelled">ملغى</option>
-
-</select>
-
-</td>
-
-<td>
-
-✅
-
-</td>
-
-</tr>
-
-`;
+  });
 
 });
 
-}
+window.changeStatus = async (id, status) => {
 
-window.changeStatus=async(id,status)=>{
+  await updateDoc(doc(db, "orders", id), {
+    status: status
+  });
 
-await updateDoc(doc(db,"orders",id),{
-
-status:status
-
-});
-
-alert("تم تحديث حالة الطلب");
-
-}
-
-loadOrders();
+};
