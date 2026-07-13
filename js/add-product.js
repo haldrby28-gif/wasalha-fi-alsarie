@@ -2,16 +2,53 @@ import { db } from "../../js/firebase.js";
 
 import {
 collection,
-addDoc
+addDoc,
+getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-document.getElementById("saveProduct").addEventListener("click", async()=>{
+const restaurantSelect=document.getElementById("restaurantId");
 
-const name=document.getElementById("name").value;
-const description=document.getElementById("description").value;
+async function loadRestaurants(){
+
+restaurantSelect.innerHTML="<option value=''>اختر المطعم</option>";
+
+const snapshot=await getDocs(collection(db,"restaurants"));
+
+snapshot.forEach((doc)=>{
+
+const data=doc.data();
+
+restaurantSelect.innerHTML+=`
+<option value="${doc.id}">
+${data.name}
+</option>
+`;
+
+});
+
+}
+
+loadRestaurants();
+
+document.getElementById("saveProduct").addEventListener("click",async()=>{
+
+const name=document.getElementById("name").value.trim();
+
+const description=document.getElementById("description").value.trim();
+
 const price=Number(document.getElementById("price").value);
-const restaurantId=document.getElementById("restaurantId").value;
+
+const restaurantId=restaurantSelect.value;
+
 const available=document.getElementById("available").value==="true";
+
+if(!name||!restaurantId){
+
+alert("أكمل جميع البيانات");
+
+return;
+
+}
 
 await addDoc(collection(db,"products"),{
 
@@ -26,5 +63,7 @@ createdAt:new Date()
 });
 
 alert("تمت إضافة المنتج بنجاح");
+
+window.location.reload();
 
 });
