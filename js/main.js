@@ -1,37 +1,58 @@
 import { db } from "./firebase.js";
 
 import {
-collection,
-getDocs
+    collection,
+    onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const container=document.getElementById("restaurants");
+const restaurantsDiv = document.getElementById("restaurants");
+const search = document.getElementById("search");
 
-async function loadRestaurants(){
+let restaurants = [];
 
-const snapshot=await getDocs(collection(db,"restaurants"));
+onSnapshot(collection(db, "restaurants"), (snapshot) => {
 
-snapshot.forEach(doc=>{
+    restaurants = [];
 
-const data=doc.data();
+    snapshot.forEach((doc) => {
 
-container.innerHTML+=`
+        restaurants.push({
+            id: doc.id,
+            ...doc.data()
+        });
 
-<div class="card">
+    });
 
-<img src="${data.image}" alt="">
+    renderRestaurants(restaurants);
 
-<h3>${data.name}</h3>
+});
 
-<p>${data.category}</p>
+function renderRestaurants(list) {
 
-<p>⭐ ${data.rating}</p>
+    restaurantsDiv.innerHTML = "";
 
-<p>🚚 ${data.deliveryTime}</p>
+    if (list.length === 0) {
 
-<button>
+        restaurantsDiv.innerHTML = "<p>لا توجد مطاعم.</p>";
+        return;
 
-عرض المطعم
+    }
+
+    list.forEach((restaurant) => {
+
+        restaurantsDiv.innerHTML += `
+
+<div class="restaurant-card">
+
+<h3>${restaurant.name}</h3>
+
+<p>${restaurant.category || ""}</p>
+
+<p>${restaurant.isOpen ? "🟢 مفتوح" : "🔴 مغلق"}</p>
+
+<button onclick="location.href='restaurant.html?id=${restaurant.id}'">
+
+عرض المنتجات
 
 </button>
 
@@ -39,8 +60,18 @@ container.innerHTML+=`
 
 `;
 
-});
+    });
 
 }
 
-loadRestaurants();
+search.addEventListener("input", () => {
+
+    const value = search.value.toLowerCase();
+
+    const filtered = restaurants.filter(r =>
+        (r.name || "").toLowerCase().includes(value)
+    );
+
+    renderRestaurants(filtered);
+
+});
