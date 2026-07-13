@@ -1,4 +1,3 @@
-
 import { auth, db } from "../firebase.js";
 
 import {
@@ -11,35 +10,59 @@ import {
     where,
     getDocs,
     doc,
-    getDoc,
     updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const ordersContainer = document.getElementById("ordersContainer");
 
+let restaurantId = "";
+
 onAuthStateChanged(auth, async (user) => {
 
     if (!user) {
+
         location.href = "login.html";
+
         return;
+
     }
 
-    const restaurantRef = doc(db, "restaurants", user.uid);
-    const restaurantSnap = await getDoc(restaurantRef);
+    try {
 
-    if (!restaurantSnap.exists()) {
-        alert("هذا الحساب ليس مطعماً.");
-        location.href = "login.html";
-        return;
+        const restaurantQuery = query(
+            collection(db, "restaurants"),
+            where("ownerUid", "==", user.uid)
+        );
+
+        const restaurantSnapshot = await getDocs(restaurantQuery);
+
+        if (restaurantSnapshot.empty) {
+
+            alert("هذا الحساب ليس صاحب مطعم.");
+
+            location.href = "login.html";
+
+            return;
+
+        }
+
+        restaurantId = restaurantSnapshot.docs[0].id;
+
+        loadOrders();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("حدث خطأ.");
+
     }
-
-    loadOrders(user.uid);
 
 });
 
-async function loadOrders(restaurantId) {
+async function loadOrders() {
 
-    ordersContainer.innerHTML = "<p>جارى تحميل الطلبات...</p>";
+    ordersContainer.innerHTML = "<p>جاري تحميل الطلبات...</p>";
 
     const q = query(
         collection(db, "orders"),
@@ -53,12 +76,13 @@ async function loadOrders(restaurantId) {
     if (snapshot.empty) {
 
         ordersContainer.innerHTML = `
-            <p style="text-align:center">
-                لا توجد طلبات
+            <p style="text-align:center;">
+                لا توجد طلبات.
             </p>
         `;
 
         return;
+
     }
 
     snapshot.forEach((docSnap) => {
@@ -67,18 +91,22 @@ async function loadOrders(restaurantId) {
 
         ordersContainer.innerHTML += `
 
-        <div class="order-card">
+        <div class="card">
 
-            <h3>طلب #${docSnap.id}</h3>
+            <h3>📦 طلب #${docSnap.id}</h3>
 
-            <p>الحالة: ${order.status}</p>
+            <p><strong>العميل:</strong> ${order.userId}</p>
 
-            <p>الإجمالي: ${order.total} جنيه</p>
+            <p><strong>العنوان:</strong> ${order.address || "-"}</p>
 
-            <p>العميل: ${order.userId}</p>
+            <p><strong>الإجمالي:</strong> ${order.total} جنيه</p>
 
-            <p>المندوب:
+            <p><strong>المندوب:</strong>
                 ${order.driverId || "لم يتم التعيين"}
+            </p>
+
+            <p><strong>الحالة:</strong>
+                ${statusText(order.status)}
             </p>
 
             ${buttons(docSnap.id, order.status)}
@@ -91,52 +119,104 @@ async function loadOrders(restaurantId) {
 
 }
 
+function statusText(status) {
+
+    switch (status) {
+
+        case "pending":
+            return "⏳ قيد الانتظار";
+
+        case "preparing":
+            return "👨‍🍳 جاري التحضير";
+
+        case "ready":
+            return "✅ جاهز للاستلام";
+
+        case "delivering":
+            return "🛵 جاري التوصيل";
+
+        case "completed":
+            return "🎉 تم التوصيل";
+
+        default:
+            return status;
+
+    }
+
+}
+
 function buttons(id, status) {
 
-    if (status === "pending") {
+    switch (status) {
 
-        return `
-        <button onclick="prepareOrder('${id}')">
-            قبول وتجهيز الطلب
-        </button>
-        `;
+        case "pending":
+
+            return `
+                <button onclick="changeStatus('${id}','preparing')">
+                    👨‍🍳 بدء التحضير
+                </button>
+            `;
+
+        case "preparing":
+
+            return `
+                <button onclick="changeStatus('${id}','ready')">
+                    ✅ الطلب جاهز
+                </button>
+            `;
+
+        case "ready":
+
+            return `
+                <button disabled>
+                    🛵 في انتظار المندوب
+                </button>
+            `;
+
+        case "delivering":
+
+            return `
+                <button disabled>
+                    🚚 جاري التوصيل
+                </button>
+            `;
+
+        case "completed":
+
+            return `
+                <button disabled>
+                    ✔ تم التسليم
+                </button>
+            `;
+
+        default:
+
+            return "";
 
     }
 
-    if (status === "preparing") {
+}
 
-        return `
-        <button onclick="readyOrder('${id}')">
-            الطلب جاهز
-        </button>
-        `;
+window.changeStatus = async function(orderId, status) {
+
+    try {
+
+        await updateDoc(doc(db, "orders", orderId), {
+
+            status: status
+
+        });
+
+        alert("✅ تم تحديث حالة الطلب.");
+
+        loadOrders();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("حدث خطأ أثناء تحديث الحالة.");
 
     }
 
-    return "";
-
-}
-
-window.prepareOrder = async function(id) {
-
-    await updateDoc(doc(db, "orders", id), {
-
-        status: "preparing"
-
-    });
-
-    loadOrders(auth.currentUser.uid);
-
-}
-
-window.readyOrder = async function(id) {
-
-    await updateDoc(doc(db, "orders", id), {
-
-        status: "ready"
-
-    });
-
-    loadOrders(auth.currentUser.uid);
-
-}
+};
