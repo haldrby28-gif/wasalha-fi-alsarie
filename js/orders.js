@@ -1,12 +1,13 @@
 import { db } from "./firebase.js";
 
 import {
-  collection,
-  getDocs,
-  doc,
-  getDoc,
-  updateDoc
+    collection,
+    getDocs,
+    getDoc,
+    doc,
+    updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
 const table = document.getElementById("ordersTable");
 
 async function loadOrders() {
@@ -18,17 +19,47 @@ async function loadOrders() {
     if (snapshot.empty) {
 
         table.innerHTML = `
-        <tr>
-            <td colspan="5">لا توجد طلبات</td>
-        </tr>
+            <tr>
+                <td colspan="6">لا توجد طلبات</td>
+            </tr>
         `;
 
         return;
     }
 
-    snapshot.forEach((orderDoc) => {
+    for (const orderDoc of snapshot.docs) {
 
         const order = orderDoc.data();
+
+        // اسم العميل
+        let userName = order.userId;
+
+        try {
+
+            const userSnap = await getDoc(doc(db, "users", order.userId));
+
+            if (userSnap.exists()) {
+
+                userName = userSnap.data().name || order.userId;
+
+            }
+
+        } catch (e) {}
+
+        // اسم المطعم
+        let restaurantName = order.restaurantId;
+
+        try {
+
+            const restaurantSnap = await getDoc(doc(db, "restaurants", order.restaurantId));
+
+            if (restaurantSnap.exists()) {
+
+                restaurantName = restaurantSnap.data().name || order.restaurantId;
+
+            }
+
+        } catch (e) {}
 
         table.innerHTML += `
 
@@ -36,7 +67,9 @@ async function loadOrders() {
 
             <td>${orderDoc.id}</td>
 
-            <td>${order.userId}</td>
+            <td>${userName}</td>
+
+            <td>${restaurantName}</td>
 
             <td>${order.total} جنيه</td>
 
@@ -44,28 +77,28 @@ async function loadOrders() {
 
                 <select id="status-${orderDoc.id}">
 
-                    <option value="قيد الانتظار" ${order.status==="قيد الانتظار"?"selected":""}>
-                    قيد الانتظار
+                    <option value="pending" ${order.status==="pending"?"selected":""}>
+                        قيد الانتظار
                     </option>
 
-                    <option value="تم القبول" ${order.status==="تم القبول"?"selected":""}>
-                    تم القبول
+                    <option value="accepted" ${order.status==="accepted"?"selected":""}>
+                        تم القبول
                     </option>
 
-                    <option value="جارى التحضير" ${order.status==="جارى التحضير"?"selected":""}>
-                    جارى التحضير
+                    <option value="preparing" ${order.status==="preparing"?"selected":""}>
+                        جاري التحضير
                     </option>
 
-                    <option value="خرج للتوصيل" ${order.status==="خرج للتوصيل"?"selected":""}>
-                    خرج للتوصيل
+                    <option value="on_the_way" ${order.status==="on_the_way"?"selected":""}>
+                        خرج للتوصيل
                     </option>
 
-                    <option value="تم التسليم" ${order.status==="تم التسليم"?"selected":""}>
-                    تم التسليم
+                    <option value="completed" ${order.status==="completed"?"selected":""}>
+                        تم التسليم
                     </option>
 
-                    <option value="ملغى" ${order.status==="ملغى"?"selected":""}>
-                    ملغى
+                    <option value="cancelled" ${order.status==="cancelled"?"selected":""}>
+                        ملغي
                     </option>
 
                 </select>
@@ -86,22 +119,22 @@ async function loadOrders() {
 
         `;
 
-    });
+    }
 
 }
 
-window.updateStatus = async function(orderId){
+window.updateStatus = async function(orderId) {
 
     const status = document.getElementById(`status-${orderId}`).value;
 
-    await updateDoc(doc(db,"orders",orderId),{
+    await updateDoc(doc(db, "orders", orderId), {
 
-        status:status
+        status: status
 
     });
 
     alert("تم تحديث حالة الطلب");
 
-}
+};
 
 loadOrders();
