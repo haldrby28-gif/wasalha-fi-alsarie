@@ -1,96 +1,104 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>وصلها في السريع - تسجيل الدخول</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>وصلها في السريع | تسجيل الدخول</title>
 
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
 
-body{
-background:#ff6b00;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-}
+    body {
+      background: linear-gradient(135deg, #ff7a00, #ff9800);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-.login-box{
-background:#fff;
-width:90%;
-max-width:400px;
-padding:25px;
-border-radius:20px;
-box-shadow:0 5px 20px rgba(0,0,0,.2);
-}
+    .login-box {
+      width: 90%;
+      max-width: 400px;
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, .2);
+    }
 
-h1{
-text-align:center;
-margin-bottom:20px;
-color:#ff6b00;
-}
+    h1 {
+      text-align: center;
+      color: #ff6b00;
+      margin-bottom: 10px;
+    }
 
-input{
-width:100%;
-padding:15px;
-margin:10px 0;
-border:1px solid #ddd;
-border-radius:10px;
-font-size:16px;
-}
+    p {
+      text-align: center;
+      color: gray;
+      margin-bottom: 20px;
+    }
 
-button{
-width:100%;
-padding:15px;
-background:#ff6b00;
-color:#fff;
-border:none;
-border-radius:10px;
-font-size:18px;
-cursor:pointer;
-}
+    input {
+      width: 100%;
+      padding: 15px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 16px;
+      outline: none;
+    }
 
-button:hover{
-background:#e85f00;
-}
+    input:focus {
+      border-color: #ff6b00;
+    }
 
-p{
-text-align:center;
-margin-top:15px;
-}
+    button {
+      width: 100%;
+      padding: 15px;
+      background: #ff6b00;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+    }
 
-a{
-color:#ff6b00;
-text-decoration:none;
-}
-</style>
+    button:hover {
+      background: #e55f00;
+    }
 
+    .register {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .register a {
+      color: #ff6b00;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="login-box">
+  <div class="login-box">
 
-<h1>وصلها في السريع</h1>
+    <h1>وصلها في السريع</h1>
 
-<input type="email" id="email" placeholder="البريد الإلكتروني">
+    <p>سجل الدخول للمتابعة</p>
 
-<input type="password" id="password" placeholder="كلمة المرور">
+    <input
+      type="email"
+      id="email"
+      placeholder="البريد الإلكتروني">
 
-<button id="loginBtn">تسجيل الدخول</button>
-
-<p>
-ليس لديك حساب؟
-<a href="#">إنشاء حساب</a>
-</p>
-
-</div>
-
-</body>
-</html>
+    <input
+      type="password"
+      id="password"
+      placeholder="كلمة المرور
