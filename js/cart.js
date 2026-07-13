@@ -11,7 +11,8 @@ const subtotal = document.getElementById("subtotal");
 const delivery = document.getElementById("delivery");
 const total = document.getElementById("total");
 const checkoutBtn = document.getElementById("checkoutBtn");
-
+const address=document.getElementById("address");
+const notes=document.getElementById("notes");
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
 function renderCart() {
