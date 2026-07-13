@@ -88,8 +88,8 @@ window.deleteRestaurant = async (id) => {
     await deleteDoc(doc(db, "restaurants", id));
 
 };
-
-// تعديل (سننفذه لاحقًا)
 window.editRestaurant = (id) => {
 
-    alert("سيتم إضافة صفحة
+    window.location.href = `edit-restaurant.html?id=${id}`;
+
+};
