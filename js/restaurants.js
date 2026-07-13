@@ -23,7 +23,7 @@ async function loadRestaurant() {
         return;
     }
 
-    // جلب بيانات المطعم
+    // تحميل بيانات المطعم
     const restaurantRef = doc(db, "restaurants", restaurantId);
     const restaurantSnap = await getDoc(restaurantRef);
 
@@ -37,6 +37,7 @@ async function loadRestaurant() {
     restaurantName.textContent = restaurant.name;
 
     restaurantInfo.innerHTML = `
+
         <div class="restaurant-card">
 
             <img
@@ -52,25 +53,30 @@ async function loadRestaurant() {
 
             <p>🚚 ${restaurant.deliveryTime}</p>
 
+            <p>💵 رسوم التوصيل: ${restaurant.deliveryFee || 20} جنيه</p>
+
+            <p>📌 الحد الأدنى: ${restaurant.minimumOrder || 0} جنيه</p>
+
             <p>${restaurant.isOpen ? "🟢 مفتوح الآن" : "🔴 مغلق الآن"}</p>
 
         </div>
+
     `;
 
-    // جلب منتجات المطعم
+    // تحميل المنتجات
     const q = query(
         collection(db, "products"),
         where("restaurantId", "==", restaurantId)
     );
 
-    const productsSnap = await getDocs(q);
+    const snapshot = await getDocs(q);
 
     productsDiv.innerHTML = "";
 
-    if (productsSnap.empty) {
+    if (snapshot.empty) {
 
         productsDiv.innerHTML = `
-            <p style="padding:20px;text-align:center">
+            <p style="text-align:center;padding:20px;">
                 لا توجد منتجات لهذا المطعم.
             </p>
         `;
@@ -80,7 +86,7 @@ async function loadRestaurant() {
 
     const products = [];
 
-    productsSnap.forEach((docSnap) => {
+    snapshot.forEach((docSnap) => {
 
         const product = {
             id: docSnap.id,
@@ -102,4 +108,71 @@ async function loadRestaurant() {
 
             <p>💰 ${product.price} جنيه</p>
 
-            <button class="
+            <button class="addCart" data-id="${product.id}">
+                ➕ إضافة إلى السلة
+            </button>
+
+        </div>
+
+        `;
+
+    });
+
+    document.querySelectorAll(".addCart").forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            const id = button.dataset.id;
+
+            const item = products.find(p => p.id === id);
+
+            if (!item) return;
+
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+            // منع الطلب من أكثر من مطعم
+            if (cart.length > 0 && cart[0].restaurantId !== restaurantId) {
+
+                alert("لا يمكن الطلب من أكثر من مطعم في نفس الوقت.");
+
+                return;
+
+            }
+
+            const index = cart.findIndex(p => p.id === item.id);
+
+            if (index > -1) {
+
+                cart[index].quantity++;
+
+            } else {
+
+                cart.push({
+
+                    ...item,
+
+                    quantity: 1,
+
+                    restaurantId: restaurantId,
+
+                    restaurantName: restaurant.name,
+
+                    deliveryFee: restaurant.deliveryFee || 20,
+
+                    minimumOrder: restaurant.minimumOrder || 0
+
+                });
+
+            }
+
+            localStorage.setItem("cart", JSON.stringify(cart));
+
+            alert("✅ تمت إضافة المنتج إلى السلة");
+
+        });
+
+    });
+
+}
+
+loadRestaurant();
