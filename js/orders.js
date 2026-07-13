@@ -4,92 +4,75 @@ import {
     collection,
     query,
     where,
-    onSnapshot
+    getDocs,
+    orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+const ordersContainer = document.getElementById("orders");
 
-const container = document.getElementById("ordersContainer");
-
-onAuthStateChanged(auth, (user) => {
+auth.onAuthStateChanged(async (user) => {
 
     if (!user) {
 
-        container.innerHTML = "<p style='text-align:center'>يجب تسجيل الدخول.</p>";
-        return;
+        ordersContainer.innerHTML = `
+            <p style="text-align:center;padding:20px;">
+                يجب تسجيل الدخول أولاً
+            </p>
+        `;
 
+        return;
     }
 
     const q = query(
         collection(db, "orders"),
-        where("userId", "==", user.uid)
+        where("userId", "==", user.uid),
+        orderBy("createdAt", "desc")
     );
 
-    onSnapshot(q, (snapshot) => {
+    const snapshot = await getDocs(q);
 
-        container.innerHTML = "";
+    if (snapshot.empty) {
 
-        if (snapshot.empty) {
+        ordersContainer.innerHTML = `
+            <p style="text-align:center;padding:20px;">
+                لا توجد طلبات حتى الآن.
+            </p>
+        `;
 
-            container.innerHTML = "<p style='text-align:center;padding:20px'>لا توجد طلبات.</p>";
-            return;
+        return;
+    }
 
-        }
+    ordersContainer.innerHTML = "";
 
-        snapshot.forEach((doc) => {
+    snapshot.forEach((docSnap) => {
 
-            const order = doc.data();
+        const order = docSnap.data();
 
-            let status = "";
+        ordersContainer.innerHTML += `
 
-            switch (order.status) {
+        <div class="order-card">
 
-                case "pending":
-                    status = "🟡 جديد";
-                    break;
+            <h3>📦 الطلب</h3>
 
-                case "preparing":
-                    status = "👨‍🍳 جاري التحضير";
-                    break;
+            <p>الحالة:
+                <strong>${order.status}</strong>
+            </p>
 
-                case "delivery":
-                    status = "🛵 مع المندوب";
-                    break;
+            <p>الإجمالي:
+                <strong>${order.total} جنيه</strong>
+            </p>
 
-                case "completed":
-                    status = "✅ تم التسليم";
-                    break;
+            <p>عدد المنتجات:
+                <strong>${order.items.length}</strong>
+            </p>
 
-                case "cancelled":
-                    status = "❌ ملغي";
-                    break;
+            <button onclick="location.href='order-details.html?id=${docSnap.id}'">
+                عرض التفاصيل
+            </button>
 
-                default:
-                    status = order.status;
+        </div>
 
-            }
-
-            container.innerHTML += `
-
-            <div class="cart-item">
-
-                <h3>رقم الطلب</h3>
-
-                <p>${doc.id}</p>
-
-                <p>الحالة: ${status}</p>
-
-                <p>الإجمالي: ${order.total} جنيه</p>
-
-                <p>عدد المنتجات: ${order.items.length}</p>
-
-            </div>
-
-            `;
-
-        });
+        `;
 
     });
 
