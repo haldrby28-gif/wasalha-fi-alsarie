@@ -8,7 +8,7 @@ import {
     collection,
     query,
     where,
-    getDocs,
+    onSnapshot,
     doc,
     getDoc,
     updateDoc
@@ -23,20 +23,19 @@ let currentDriverId = "";
 onAuthStateChanged(auth, async (user) => {
 
     if (!user) {
-        window.location.href = "login.html";
+        location.href = "login.html";
         return;
     }
 
     currentDriverId = user.uid;
 
-    const driverRef = doc(db, "drivers", currentDriverId);
-    const driverSnap = await getDoc(driverRef);
+    const driverSnap = await getDoc(doc(db, "drivers", currentDriverId));
 
     if (!driverSnap.exists()) {
 
-        alert("هذا الحساب ليس حساب مندوب.");
+        alert("هذا الحساب ليس حساب مندوب");
 
-        window.location.href = "login.html";
+        location.href = "login.html";
 
         return;
     }
@@ -52,12 +51,68 @@ onAuthStateChanged(auth, async (user) => {
 
 });
 
-async function loadOrders() {
+function loadOrders() {
 
-    ordersContainer.innerHTML = `
-        <p style="text-align:center">
-            جاري تحميل الطلبات...
-        </p>
-    `;
+    const q = query(
+        collection(db, "orders"),
+        where("status", "==", "ready")
+    );
 
-   
+    onSnapshot(q, (snapshot) => {
+
+        ordersContainer.innerHTML = "";
+
+        if (snapshot.empty) {
+
+            ordersContainer.innerHTML = `
+                <p style="text-align:center">
+                    لا توجد طلبات جاهزة.
+                </p>
+            `;
+
+            return;
+        }
+
+        snapshot.forEach((docSnap) => {
+
+            const order = docSnap.data();
+
+            ordersContainer.innerHTML += `
+
+            <div class="card">
+
+                <h3>📦 طلب</h3>
+
+                <p>العنوان: ${order.address}</p>
+
+                <p>الإجمالي: ${order.total} جنيه</p>
+
+                <button onclick="acceptOrder('${docSnap.id}')">
+
+                    استلام الطلب
+
+                </button>
+
+            </div>
+
+            `;
+
+        });
+
+    });
+
+}
+
+window.acceptOrder = async function(orderId){
+
+    await updateDoc(doc(db,"orders",orderId),{
+
+        driverId: currentDriverId,
+
+        status:"delivering"
+
+    });
+
+    alert("تم استلام الطلب");
+
+}
