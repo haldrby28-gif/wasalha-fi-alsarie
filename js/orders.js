@@ -1,79 +1,107 @@
-import { db, auth } from "./firebase.js";
+import { db } from "./firebase.js";
 
 import {
-    collection,
-    query,
-    where,
-    getDocs,
-    orderBy
+  collection,
+  getDocs,
+  doc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const ordersContainer = document.getElementById("orders");
+const table = document.getElementById("ordersTable");
 
-auth.onAuthStateChanged(async (user) => {
+async function loadOrders() {
 
-    if (!user) {
+    table.innerHTML = "";
 
-        ordersContainer.innerHTML = `
-            <p style="text-align:center;padding:20px;">
-                يجب تسجيل الدخول أولاً
-            </p>
-        `;
-
-        return;
-    }
-
-    const q = query(
-        collection(db, "orders"),
-        where("userId", "==", user.uid),
-        orderBy("createdAt", "desc")
-    );
-
-    const snapshot = await getDocs(q);
+    const snapshot = await getDocs(collection(db, "orders"));
 
     if (snapshot.empty) {
 
-        ordersContainer.innerHTML = `
-            <p style="text-align:center;padding:20px;">
-                لا توجد طلبات حتى الآن.
-            </p>
+        table.innerHTML = `
+        <tr>
+            <td colspan="5">لا توجد طلبات</td>
+        </tr>
         `;
 
         return;
     }
 
-    ordersContainer.innerHTML = "";
+    snapshot.forEach((orderDoc) => {
 
-    snapshot.forEach((docSnap) => {
+        const order = orderDoc.data();
 
-        const order = docSnap.data();
+        table.innerHTML += `
 
-        ordersContainer.innerHTML += `
+        <tr>
 
-        <div class="order-card">
+            <td>${orderDoc.id}</td>
 
-            <h3>📦 الطلب</h3>
+            <td>${order.userId}</td>
 
-            <p>الحالة:
-                <strong>${order.status}</strong>
-            </p>
+            <td>${order.total} جنيه</td>
 
-            <p>الإجمالي:
-                <strong>${order.total} جنيه</strong>
-            </p>
+            <td>
 
-            <p>عدد المنتجات:
-                <strong>${order.items.length}</strong>
-            </p>
+                <select id="status-${orderDoc.id}">
 
-            <button onclick="location.href='order-details.html?id=${docSnap.id}'">
-                عرض التفاصيل
-            </button>
+                    <option value="قيد الانتظار" ${order.status==="قيد الانتظار"?"selected":""}>
+                    قيد الانتظار
+                    </option>
 
-        </div>
+                    <option value="تم القبول" ${order.status==="تم القبول"?"selected":""}>
+                    تم القبول
+                    </option>
+
+                    <option value="جارى التحضير" ${order.status==="جارى التحضير"?"selected":""}>
+                    جارى التحضير
+                    </option>
+
+                    <option value="خرج للتوصيل" ${order.status==="خرج للتوصيل"?"selected":""}>
+                    خرج للتوصيل
+                    </option>
+
+                    <option value="تم التسليم" ${order.status==="تم التسليم"?"selected":""}>
+                    تم التسليم
+                    </option>
+
+                    <option value="ملغى" ${order.status==="ملغى"?"selected":""}>
+                    ملغى
+                    </option>
+
+                </select>
+
+            </td>
+
+            <td>
+
+                <button onclick="updateStatus('${orderDoc.id}')">
+
+                    حفظ
+
+                </button>
+
+            </td>
+
+        </tr>
 
         `;
 
     });
 
-});
+}
+
+window.updateStatus = async function(orderId){
+
+    const status = document.getElementById(`status-${orderId}`).value;
+
+    await updateDoc(doc(db,"orders",orderId),{
+
+        status:status
+
+    });
+
+    alert("تم تحديث حالة الطلب");
+
+}
+
+loadOrders();
