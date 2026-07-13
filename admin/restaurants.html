@@ -4,110 +4,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>إدارة المطاعم | وصلها في السريع</title>
 
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
+<title>إدارة المطاعم</title>
 
-body{
-background:#f4f6f9;
-}
-
-header{
-background:#ff6b00;
-color:white;
-padding:18px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
-
-button{
-background:#fff;
-color:#ff6b00;
-border:none;
-padding:10px 18px;
-border-radius:10px;
-font-weight:bold;
-cursor:pointer;
-}
-
-.container{
-padding:20px;
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-background:white;
-border-radius:12px;
-overflow:hidden;
-}
-
-th,td{
-padding:15px;
-border-bottom:1px solid #eee;
-text-align:center;
-}
-
-th{
-background:#ff6b00;
-color:white;
-}
-
-.action{
-padding:8px 12px;
-border-radius:8px;
-border:none;
-cursor:pointer;
-margin:2px;
-}
-
-.edit{
-background:#2196F3;
-color:white;
-}
-
-.delete{
-background:#F44336;
-color:white;
-}
-</style>
+<link rel="stylesheet" href="../css/admin.css">
 
 </head>
 
 <body>
 
-<header>
+<div id="sidebar"></div>
 
-<h2>إدارة المطاعم</h2>
+<div class="content">
 
-<button onclick="window.location='add-restaurant.html'">
-➕ إضافة مطعم
-</button>
+<div id="header"></div>
 
-</header>
+<h1>إدارة المطاعم</h1>
 
-<div class="container">
+<div style="margin:20px 0;display:flex;gap:10px;flex-wrap:wrap;">
 
-<table>
+<input
+id="searchRestaurant"
+type="text"
+placeholder="ابحث عن مطعم..."
+style="padding:10px;width:300px;max-width:100%;">
+
+<a href="add-restaurant.html">
+<button>➕ إضافة مطعم</button>
+</a>
+
+</div>
+
+<table id="restaurantsTable" border="1" width="100%" cellspacing="0">
 
 <thead>
 
 <tr>
 
-<th>الصورة</th>
-
-<th>اسم المطعم</th>
+<th>الاسم</th>
 
 <th>التصنيف</th>
 
-<th>التقييم</th>
+<th>الهاتف</th>
 
 <th>الحالة</th>
 
@@ -117,20 +55,19 @@ color:white;
 
 </thead>
 
-<tbody id="restaurantsTable">
+<tbody>
 
 </tbody>
 
 </table>
 
+<div id="footer"></div>
+
 </div>
 
-<script type="module" src="js/restaurants.js"></script>
-  <script type="module" src="js/dashboard.js"></script>
+<script src="js/layout.js"></script>
 <script type="module" src="js/auth-guard.js"></script>
+<script type="module" src="js/restaurants.js"></script>
 
 </body>
-</html>
-</body>
-
 </html>
