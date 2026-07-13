@@ -2,49 +2,67 @@ import { db } from "../../js/firebase.js";
 
 import {
   collection,
-  addDoc
+  getDocs,
+  deleteDoc,
+  doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const saveBtn = document.getElementById("saveRestaurant");
+const table = document.getElementById("restaurantsTable");
 
-saveBtn.addEventListener("click", async () => {
+async function loadRestaurants() {
 
-  const name = document.getElementById("name").value.trim();
-  const description = document.getElementById("description").value.trim();
-  const category = document.getElementById("category").value.trim();
-  const deliveryTime = document.getElementById("deliveryTime").value.trim();
-  const deliveryFee = Number(document.getElementById("deliveryFee").value);
-  const status = document.getElementById("status").value === "true";
+  table.innerHTML = "";
 
-  if (!name || !category) {
-    alert("يرجى إدخال اسم المطعم والتصنيف.");
-    return;
-  }
+  const snapshot = await getDocs(collection(db, "restaurants"));
 
-  try {
-    await addDoc(collection(db, "restaurants"), {
-      name,
-      description,
-      category,
-      deliveryTime,
-      deliveryFee,
-      isOpen: status,
-      rating: 5,
-      image: "",
-      createdAt: new Date()
-    });
+  snapshot.forEach((restaurant) => {
 
-    alert("تم إضافة المطعم بنجاح ✅");
+    const data = restaurant.data();
 
-    document.getElementById("name").value = "";
-    document.getElementById("description").value = "";
-    document.getElementById("category").value = "";
-    document.getElementById("deliveryTime").value = "";
-    document.getElementById("deliveryFee").value = "";
+    table.innerHTML += `
+      <tr>
+        <td>
+          <img src="${data.image || 'https://via.placeholder.com/80'}"
+               width="80"
+               height="60"
+               style="border-radius:8px;">
+        </td>
 
-  } catch (error) {
-    console.error(error);
-    alert("حدث خطأ أثناء إضافة المطعم");
-  }
+        <td>${data.name}</td>
 
-});
+        <td>${data.category}</td>
+
+        <td>⭐ ${data.rating ?? 0}</td>
+
+        <td>${data.isOpen ? "🟢 مفتوح" : "🔴 مغلق"}</td>
+
+        <td>
+          <button class="action edit">
+            تعديل
+          </button>
+
+          <button class="action delete"
+            onclick="deleteRestaurant('${restaurant.id}')">
+            حذف
+          </button>
+        </td>
+      </tr>
+    `;
+
+  });
+
+}
+
+window.deleteRestaurant = async function(id){
+
+const ok = confirm("هل تريد حذف المطعم؟");
+
+if(!ok) return;
+
+await deleteDoc(doc(db,"restaurants",id));
+
+loadRestaurants();
+
+}
+
+loadRestaurants();
