@@ -1,1 +1,132 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إدارة المطاعم | وصلها في السريع</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#f4f6f9;
+}
+
+header{
+background:#ff6b00;
+color:white;
+padding:18px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+button{
+background:#fff;
+color:#ff6b00;
+border:none;
+padding:10px 18px;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.container{
+padding:20px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:white;
+border-radius:12px;
+overflow:hidden;
+}
+
+th,td{
+padding:15px;
+border-bottom:1px solid #eee;
+text-align:center;
+}
+
+th{
+background:#ff6b00;
+color:white;
+}
+
+.action{
+padding:8px 12px;
+border-radius:8px;
+border:none;
+cursor:pointer;
+margin:2px;
+}
+
+.edit{
+background:#2196F3;
+color:white;
+}
+
+.delete{
+background:#F44336;
+color:white;
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h2>إدارة المطاعم</h2>
+
+<button onclick="window.location='add-restaurant.html'">
+➕ إضافة مطعم
+</button>
+
+</header>
+
+<div class="container">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>الصورة</th>
+
+<th>اسم المطعم</th>
+
+<th>التصنيف</th>
+
+<th>التقييم</th>
+
+<th>الحالة</th>
+
+<th>الإجراءات</th>
+
+</tr>
+
+</thead>
+
+<tbody id="restaurantsTable">
+
+</tbody>
+
+</table>
+
+</div>
+
+<script type="module" src="js/restaurants.js"></script>
+
+</body>
+
+</html>
