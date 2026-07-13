@@ -29,11 +29,15 @@ onAuthStateChanged(auth, async (user) => {
 
     currentDriverId = user.uid;
 
-    const driverSnap = await getDoc(doc(db, "drivers", user.uid));
+    const driverRef = doc(db, "drivers", currentDriverId);
+    const driverSnap = await getDoc(driverRef);
 
     if (!driverSnap.exists()) {
+
         alert("هذا الحساب ليس حساب مندوب.");
+
         window.location.href = "login.html";
+
         return;
     }
 
@@ -50,107 +54,10 @@ onAuthStateChanged(auth, async (user) => {
 
 async function loadOrders() {
 
-    ordersContainer.innerHTML = "<p>جاري تحميل الطلبات...</p>";
-
-    const q = query(
-        collection(db, "orders"),
-        where("status", "==", "pending")
-    );
-
-    const snapshot = await getDocs(q);
-
-    ordersContainer.innerHTML = "";
-
-    if (snapshot.empty) {
-
-        ordersContainer.innerHTML = `
+    ordersContainer.innerHTML = `
         <p style="text-align:center">
-            لا توجد طلبات جديدة
+            جاري تحميل الطلبات...
         </p>
-        `;
+    `;
 
-        return;
-    }
-
-    for (const orderDoc of snapshot.docs) {
-
-        const order = orderDoc.data();
-
-        let userName = order.userId;
-        let restaurantName = order.restaurantId;
-
-        try {
-
-            const userSnap = await getDoc(doc(db, "users", order.userId));
-
-            if (userSnap.exists()) {
-                userName = userSnap.data().name;
-            }
-
-        } catch (e) {}
-
-        try {
-
-            const restaurantSnap = await getDoc(doc(db, "restaurants", order.restaurantId));
-
-            if (restaurantSnap.exists()) {
-                restaurantName = restaurantSnap.data().name;
-            }
-
-        } catch (e) {}
-
-        ordersContainer.innerHTML += `
-
-        <div class="order-card">
-
-            <h3>📦 الطلب #${orderDoc.id}</h3>
-
-            <p>👤 العميل: ${userName}</p>
-
-            <p>🏪 المطعم: ${restaurantName}</p>
-
-            <p>💰 الإجمالي: ${order.total} جنيه</p>
-
-            <button onclick="acceptOrder('${orderDoc.id}')">
-                استلام الطلب
-            </button>
-
-        </div>
-
-        `;
-
-    }
-
-}
-
-window.acceptOrder = async function(orderId) {
-
-    try {
-
-        await updateDoc(doc(db, "orders", orderId), {
-
-            driverId: currentDriverId,
-            status: "delivering"
-
-        });
-
-        await updateDoc(doc(db, "drivers", currentDriverId), {
-
-            currentOrder: orderId,
-            isAvailable: false
-
-        });
-
-        alert("✅ تم استلام الطلب بنجاح");
-
-        loadOrders();
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert("حدث خطأ أثناء استلام الطلب");
-
-    }
-
-};
+   
