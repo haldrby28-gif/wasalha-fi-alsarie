@@ -16,7 +16,7 @@ const notes = document.getElementById("notes");
 
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-// إذا كانت المنتجات القديمة لا تحتوي على quantity
+// ضمان وجود quantity
 cart = cart.map(item => ({
     ...item,
     quantity: item.quantity || 1
@@ -97,7 +97,7 @@ window.increaseQty = function(index) {
 
     renderCart();
 
-}
+};
 
 window.decreaseQty = function(index) {
 
@@ -115,7 +115,7 @@ window.decreaseQty = function(index) {
 
     renderCart();
 
-}
+};
 
 window.removeItem = function(index) {
 
@@ -125,7 +125,7 @@ window.removeItem = function(index) {
 
     renderCart();
 
-}
+};
 
 checkoutBtn.addEventListener("click", async () => {
 
@@ -161,6 +161,10 @@ checkoutBtn.addEventListener("click", async () => {
 
             userId: auth.currentUser.uid,
 
+            restaurantId: cart[0].restaurantId || "",
+
+            restaurantName: cart[0].restaurantName || "",
+
             items: cart,
 
             address: address.value,
@@ -172,6 +176,8 @@ checkoutBtn.addEventListener("click", async () => {
             deliveryFee: Number(delivery.textContent),
 
             total: Number(total.textContent),
+
+            driverId: "",
 
             status: "pending",
 
