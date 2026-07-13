@@ -1,1 +1,151 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>تعديل المنتج</title>
+
+<link rel="stylesheet" href="../style.css">
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+background:#f5f5f5;
+margin:0;
+}
+
+header{
+background:#ff6b00;
+color:#fff;
+padding:18px;
+text-align:center;
+font-size:24px;
+}
+
+.container{
+max-width:600px;
+margin:20px auto;
+background:#fff;
+padding:20px;
+border-radius:10px;
+box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+
+input,
+textarea{
+
+width:100%;
+padding:12px;
+margin:10px 0;
+border:1px solid #ddd;
+border-radius:8px;
+box-sizing:border-box;
+
+}
+
+button{
+
+width:100%;
+padding:14px;
+background:#ff6b00;
+color:#fff;
+border:none;
+border-radius:8px;
+font-size:18px;
+cursor:pointer;
+
+}
+
+img{
+
+width:100%;
+height:220px;
+object-fit:cover;
+border-radius:10px;
+margin-top:10px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+✏️ تعديل المنتج
+
+</header>
+
+<div class="container">
+
+<form id="productForm">
+
+<input
+id="name"
+type="text"
+placeholder="اسم المنتج"
+required>
+
+<textarea
+id="description"
+placeholder="الوصف">
+</textarea>
+
+<input
+id="price"
+type="number"
+placeholder="السعر"
+required>
+
+<input
+id="category"
+type="text"
+placeholder="التصنيف">
+
+<input
+id="image"
+type="url"
+placeholder="رابط الصورة">
+
+<img id="preview">
+
+<button type="submit">
+
+💾 حفظ التعديلات
+
+</button>
+
+</form>
+
+</div>
+
+<script>
+
+const image=document.getElementById("image");
+
+const preview=document.getElementById("preview");
+
+image.addEventListener("input",()=>{
+
+preview.src=image.value;
+
+});
+
+</script>
+
+<script
+type="module"
+src="../js/restaurant/restaurant-edit-product.js">
+
+</script>
+
+</body>
+
+</html>
