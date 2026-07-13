@@ -1,140 +1,130 @@
-import { db } from "./firebase.js";
+import { db, auth } from "./firebase.js";
 
 import {
     collection,
+    query,
+    where,
     getDocs,
-    getDoc,
-    doc,
-    updateDoc
+    orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const table = document.getElementById("ordersTable");
+const ordersContainer = document.getElementById("orders");
 
-async function loadOrders() {
+auth.onAuthStateChanged(async (user) => {
 
-    table.innerHTML = "";
+    if (!user) {
 
-    const snapshot = await getDocs(collection(db, "orders"));
-
-    if (snapshot.empty) {
-
-        table.innerHTML = `
-            <tr>
-                <td colspan="6">لا توجد طلبات</td>
-            </tr>
+        ordersContainer.innerHTML = `
+            <p style="text-align:center;padding:20px;">
+                يجب تسجيل الدخول أولاً
+            </p>
         `;
 
         return;
     }
 
-    for (const orderDoc of snapshot.docs) {
+    try {
 
-        const order = orderDoc.data();
+        const q = query(
+            collection(db, "orders"),
+            where("userId", "==", user.uid),
+            orderBy("createdAt", "desc")
+        );
 
-        // اسم العميل
-        let userName = order.userId;
+        const snapshot = await getDocs(q);
 
-        try {
+        if (snapshot.empty) {
 
-            const userSnap = await getDoc(doc(db, "users", order.userId));
+            ordersContainer.innerHTML = `
+                <p style="text-align:center;padding:20px;">
+                    لا توجد طلبات حتى الآن.
+                </p>
+            `;
 
-            if (userSnap.exists()) {
+            return;
+        }
 
-                userName = userSnap.data().name || order.userId;
+        ordersContainer.innerHTML = "";
+
+        snapshot.forEach((docSnap) => {
+
+            const order = docSnap.data();
+
+            let statusText = order.status;
+
+            switch (order.status) {
+
+                case "pending":
+                    statusText = "🟡 بانتظار قبول المندوب";
+                    break;
+
+                case "delivering":
+                    statusText = "🚚 جاري التوصيل";
+                    break;
+
+                case "completed":
+                    statusText = "✅ تم التسليم";
+                    break;
+
+                case "cancelled":
+                    statusText = "❌ ملغي";
+                    break;
 
             }
 
-        } catch (e) {}
+            ordersContainer.innerHTML += `
 
-        // اسم المطعم
-        let restaurantName = order.restaurantId;
+            <div class="order-card">
 
-        try {
+                <h3>📦 الطلب</h3>
 
-            const restaurantSnap = await getDoc(doc(db, "restaurants", order.restaurantId));
+                <p>
+                    <strong>الحالة:</strong>
+                    ${statusText}
+                </p>
 
-            if (restaurantSnap.exists()) {
+                <p>
+                    <strong>الإجمالي:</strong>
+                    ${order.total} جنيه
+                </p>
 
-                restaurantName = restaurantSnap.data().name || order.restaurantId;
+                <p>
+                    <strong>عدد المنتجات:</strong>
+                    ${order.items.length}
+                </p>
 
-            }
-
-        } catch (e) {}
-
-        table.innerHTML += `
-
-        <tr>
-
-            <td>${orderDoc.id}</td>
-
-            <td>${userName}</td>
-
-            <td>${restaurantName}</td>
-
-            <td>${order.total} جنيه</td>
-
-            <td>
-
-                <select id="status-${orderDoc.id}">
-
-                    <option value="pending" ${order.status==="pending"?"selected":""}>
-                        قيد الانتظار
-                    </option>
-
-                    <option value="accepted" ${order.status==="accepted"?"selected":""}>
-                        تم القبول
-                    </option>
-
-                    <option value="preparing" ${order.status==="preparing"?"selected":""}>
-                        جاري التحضير
-                    </option>
-
-                    <option value="on_the_way" ${order.status==="on_the_way"?"selected":""}>
-                        خرج للتوصيل
-                    </option>
-
-                    <option value="completed" ${order.status==="completed"?"selected":""}>
-                        تم التسليم
-                    </option>
-
-                    <option value="cancelled" ${order.status==="cancelled"?"selected":""}>
-                        ملغي
-                    </option>
-
-                </select>
-
-            </td>
-
-            <td>
-
-                <button onclick="updateStatus('${orderDoc.id}')">
-
-                    حفظ
-
+                <button onclick="location.href='order-details.html?id=${docSnap.id}'">
+                    📄 عرض التفاصيل
                 </button>
 
-            </td>
+                ${
+                    order.status === "delivering"
+                    ? `
+                    <button
+                        style="margin-top:10px;background:#28a745;color:#fff;"
+                        onclick="location.href='tracking.html?id=${docSnap.id}'">
+                        🚚 تتبع الطلب
+                    </button>
+                    `
+                    : ""
+                }
 
-        </tr>
+            </div>
 
+            `;
+
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        ordersContainer.innerHTML = `
+            <p style="text-align:center;color:red;padding:20px;">
+                حدث خطأ أثناء تحميل الطلبات.
+            </p>
         `;
 
     }
 
-}
-
-window.updateStatus = async function(orderId) {
-
-    const status = document.getElementById(`status-${orderId}`).value;
-
-    await updateDoc(doc(db, "orders", orderId), {
-
-        status: status
-
-    });
-
-    alert("تم تحديث حالة الطلب");
-
-};
-
-loadOrders();
+});
