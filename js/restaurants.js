@@ -1,178 +1,152 @@
-import { db } from "./firebase.js";
+import { db } from "../firebase.js";
 
 import {
-    doc,
-    getDoc,
     collection,
-    query,
-    where,
-    getDocs
+    getDocs,
+    doc,
+    updateDoc,
+    deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const params = new URLSearchParams(window.location.search);
-const restaurantId = params.get("id");
+const tbody = document.querySelector("#restaurantsTable tbody");
+const searchInput = document.getElementById("searchRestaurant");
 
-const restaurantName = document.getElementById("restaurantName");
-const restaurantInfo = document.getElementById("restaurantInfo");
-const productsDiv = document.getElementById("products");
+let restaurants = [];
 
-async function loadRestaurant() {
+async function loadRestaurants() {
 
-    if (!restaurantId) {
-        restaurantName.textContent = "المطعم غير موجود";
-        return;
-    }
+    tbody.innerHTML = "";
 
-    // تحميل بيانات المطعم
-    const restaurantRef = doc(db, "restaurants", restaurantId);
-    const restaurantSnap = await getDoc(restaurantRef);
+    const snapshot = await getDocs(collection(db, "restaurants"));
 
-    if (!restaurantSnap.exists()) {
-        restaurantName.textContent = "المطعم غير موجود";
-        return;
-    }
-
-    const restaurant = restaurantSnap.data();
-
-    restaurantName.textContent = restaurant.name;
-
-    restaurantInfo.innerHTML = `
-
-        <div class="restaurant-card">
-
-            <img
-                src="${restaurant.image}"
-                alt="${restaurant.name}"
-                style="width:100%;height:200px;object-fit:cover;border-radius:10px;">
-
-            <h3>${restaurant.name}</h3>
-
-            <p>🍽️ ${restaurant.category}</p>
-
-            <p>⭐ ${restaurant.rating}</p>
-
-            <p>🚚 ${restaurant.deliveryTime}</p>
-
-            <p>💵 رسوم التوصيل: ${restaurant.deliveryFee || 20} جنيه</p>
-
-            <p>📌 الحد الأدنى: ${restaurant.minimumOrder || 0} جنيه</p>
-
-            <p>${restaurant.isOpen ? "🟢 مفتوح الآن" : "🔴 مغلق الآن"}</p>
-
-        </div>
-
-    `;
-
-    // تحميل المنتجات
-    const q = query(
-        collection(db, "products"),
-        where("restaurantId", "==", restaurantId)
-    );
-
-    const snapshot = await getDocs(q);
-
-    productsDiv.innerHTML = "";
-
-    if (snapshot.empty) {
-
-        productsDiv.innerHTML = `
-            <p style="text-align:center;padding:20px;">
-                لا توجد منتجات لهذا المطعم.
-            </p>
-        `;
-
-        return;
-    }
-
-    const products = [];
+    restaurants = [];
 
     snapshot.forEach((docSnap) => {
 
-        const product = {
+        restaurants.push({
             id: docSnap.id,
             ...docSnap.data()
-        };
-
-        products.push(product);
-
-        productsDiv.innerHTML += `
-
-        <div class="restaurant-card">
-
-            <img
-                src="${product.image}"
-                alt="${product.name}"
-                style="width:100%;height:170px;object-fit:cover;border-radius:10px;">
-
-            <h3>${product.name}</h3>
-
-            <p>💰 ${product.price} جنيه</p>
-
-            <button class="addCart" data-id="${product.id}">
-                ➕ إضافة إلى السلة
-            </button>
-
-        </div>
-
-        `;
+        });
 
     });
 
-    document.querySelectorAll(".addCart").forEach(button => {
+    renderRestaurants(restaurants);
 
-        button.addEventListener("click", () => {
+}
 
-            const id = button.dataset.id;
+function renderRestaurants(list) {
 
-            const item = products.find(p => p.id === id);
+    tbody.innerHTML = "";
 
-            if (!item) return;
+    if (list.length === 0) {
 
-            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+        tbody.innerHTML = `
+        <tr>
+            <td colspan="5">
+                لا توجد مطاعم
+            </td>
+        </tr>
+        `;
 
-            // منع الطلب من أكثر من مطعم
-            if (cart.length > 0 && cart[0].restaurantId !== restaurantId) {
+        return;
 
-                alert("لا يمكن الطلب من أكثر من مطعم في نفس الوقت.");
+    }
 
-                return;
+    list.forEach((restaurant) => {
 
-            }
+        tbody.innerHTML += `
 
-            const index = cart.findIndex(p => p.id === item.id);
+        <tr>
 
-            if (index > -1) {
+            <td>${restaurant.name}</td>
 
-                cart[index].quantity++;
+            <td>${restaurant.category || "-"}</td>
 
-            } else {
+            <td>${restaurant.phone || "-"}</td>
 
-                cart.push({
+            <td>
 
-                    ...item,
+                ${restaurant.isOpen
+                    ? "🟢 مفتوح"
+                    : "🔴 مغلق"}
 
-                    quantity: 1,
+            </td>
 
-                    restaurantId: restaurantId,
+            <td>
 
-                    restaurantName: restaurant.name,
+                <button onclick="toggleRestaurant('${restaurant.id}', ${restaurant.isOpen})">
 
-                    deliveryFee: restaurant.deliveryFee || 20,
+                    ${restaurant.isOpen
+                        ? "إغلاق"
+                        : "فتح"}
 
-                    minimumOrder: restaurant.minimumOrder || 0
+                </button>
 
-                });
+                <button onclick="editRestaurant('${restaurant.id}')">
 
-            }
+                    تعديل
 
-            localStorage.setItem("cart", JSON.stringify(cart));
+                </button>
 
-            alert("✅ تمت إضافة المنتج إلى السلة");
+                <button onclick="removeRestaurant('${restaurant.id}')">
 
-        });
+                    حذف
+
+                </button>
+
+            </td>
+
+        </tr>
+
+        `;
 
     });
 
 }
 
-loadRestaurant();
+window.toggleRestaurant = async function(id, currentStatus) {
+
+    await updateDoc(doc(db, "restaurants", id), {
+
+        isOpen: !currentStatus
+
+    });
+
+    loadRestaurants();
+
+};
+
+window.removeRestaurant = async function(id) {
+
+    if (!confirm("هل تريد حذف المطعم؟"))
+        return;
+
+    await deleteDoc(doc(db, "restaurants", id));
+
+    loadRestaurants();
+
+};
+
+window.editRestaurant = function(id) {
+
+    location.href = `edit-restaurant.html?id=${id}`;
+
+};
+
+searchInput.addEventListener("input", () => {
+
+    const value = searchInput.value.toLowerCase();
+
+    const filtered = restaurants.filter(r =>
+
+        (r.name || "")
+        .toLowerCase()
+        .includes(value)
+
+    );
+
+    renderRestaurants(filtered);
+
+});
+
+loadRestaurants();
