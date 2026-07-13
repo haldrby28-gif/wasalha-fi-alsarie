@@ -1,1 +1,163 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>الرئيسية - المندوب</title>
+
+<link rel="stylesheet" href="../css/style.css">
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:#f5f5f5;
+}
+
+header{
+background:#ff6b00;
+color:#fff;
+padding:18px;
+text-align:center;
+font-size:22px;
+font-weight:bold;
+}
+
+.driver-card{
+background:#fff;
+margin:15px;
+padding:15px;
+border-radius:12px;
+box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+
+.status{
+margin-top:10px;
+font-size:18px;
+font-weight:bold;
+}
+
+.orders{
+padding:15px;
+}
+
+.order-card{
+background:#fff;
+padding:15px;
+margin-bottom:15px;
+border-radius:12px;
+box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+
+.order-card h3{
+margin:0 0 10px;
+}
+
+button{
+width:100%;
+padding:12px;
+background:#ff6b00;
+color:white;
+border:none;
+border-radius:8px;
+font-size:16px;
+cursor:pointer;
+margin-top:10px;
+}
+
+button:hover{
+background:#e45f00;
+}
+
+.bottom-nav{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+background:#fff;
+display:flex;
+justify-content:space-around;
+padding:10px 0;
+box-shadow:0 -2px 8px rgba(0,0,0,.1);
+}
+
+.bottom-nav a{
+text-decoration:none;
+color:#333;
+font-size:14px;
+text-align:center;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+🚚 تطبيق المندوب
+
+</header>
+
+<div class="driver-card">
+
+<h2 id="driverName">...</h2>
+
+<div class="status">
+
+الحالة:
+
+<span id="driverStatus">
+
+🟢 متصل
+
+</span>
+
+</div>
+
+</div>
+
+<div class="orders">
+
+<h2>
+
+الطلبات الجديدة
+
+</h2>
+
+<div id="ordersContainer">
+
+<p style="text-align:center">
+
+جاري تحميل الطلبات...
+
+</p>
+
+</div>
+
+</div>
+
+<nav class="bottom-nav">
+
+<a href="home.html">
+
+🏠<br>
+
+الرئيسية
+
+</a>
+
+<a href="profile.html">
+
+👤<br>
+
+حسابي
+
+</a>
+
+<a href="settings.html">
