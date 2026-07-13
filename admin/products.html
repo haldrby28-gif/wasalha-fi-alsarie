@@ -1,11 +1,140 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>إدارة المنتجات</title>
+
+<link rel="stylesheet" href="css/admin.css">
+
+<style>
+
+header{
+
+background:#ff6b00;
+
+color:white;
+
+padding:18px;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+}
+
+table{
+
+width:100%;
+
+border-collapse:collapse;
+
+background:white;
+
+margin-top:20px;
+
+}
+
+th,td{
+
+padding:15px;
+
+border-bottom:1px solid #eee;
+
+text-align:center;
+
+}
+
+th{
+
+background:#ff6b00;
+
+color:white;
+
+}
+
+button{
+
+padding:10px 15px;
+
+border:none;
+
+border-radius:8px;
+
+cursor:pointer;
+
+}
+
+.add{
+
+background:#4CAF50;
+
+color:white;
+
+}
+
+.delete{
+
+background:#f44336;
+
+color:white;
+
+}
+
+</style>
+
 </head>
+
 <body>
 
+<header>
+
+<h2>إدارة المنتجات</h2>
+
+<button class="add"
+
+onclick="window.location='add-product.html'">
+
+➕ إضافة منتج
+
+</button>
+
+</header>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>المنتج</th>
+
+<th>المطعم</th>
+
+<th>السعر</th>
+
+<th>الحالة</th>
+
+<th>الإجراءات</th>
+
+</tr>
+
+</thead>
+
+<tbody id="productsTable">
+
+</tbody>
+
+</table>
+
+<script type="module" src="js/products.js"></script>
+
 </body>
+
 </html>
