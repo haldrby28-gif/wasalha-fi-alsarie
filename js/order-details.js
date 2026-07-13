@@ -10,6 +10,34 @@ const orderId = params.get("id");
 
 const orderDetails = document.getElementById("orderDetails");
 
+function getStatus(status) {
+
+    switch (status) {
+
+        case "pending":
+            return "🟡 قيد الانتظار";
+
+        case "accepted":
+            return "✅ تم قبول الطلب";
+
+        case "preparing":
+            return "👨‍🍳 جاري التحضير";
+
+        case "on_the_way":
+            return "🛵 في الطريق";
+
+        case "completed":
+            return "🎉 تم التسليم";
+
+        case "cancelled":
+            return "❌ تم إلغاء الطلب";
+
+        default:
+            return status || "غير معروف";
+    }
+
+}
+
 async function loadOrder() {
 
     if (!orderId) {
@@ -36,11 +64,11 @@ async function loadOrder() {
 
     <div class="order-card">
 
-        <h3>الحالة: ${order.status}</h3>
+        <h2>${getStatus(order.status)}</h2>
 
-        <p>📍 العنوان: ${order.address}</p>
+        <p><strong>📍 العنوان:</strong> ${order.address}</p>
 
-        <p>📝 الملاحظات: ${order.notes || "لا يوجد"}</p>
+        <p><strong>📝 الملاحظات:</strong> ${order.notes || "لا يوجد"}</p>
 
         <hr>
 
@@ -60,6 +88,8 @@ async function loadOrder() {
 
             <p>السعر: ${item.price} جنيه</p>
 
+            <hr>
+
         </div>
 
         `;
@@ -68,13 +98,27 @@ async function loadOrder() {
 
     html += `
 
-        <hr>
-
         <h3>الإجمالي: ${order.total} جنيه</h3>
 
-    </div>
-
     `;
+
+    if (order.status === "completed") {
+
+        html += `
+
+        <br>
+
+        <button onclick="location.href='rate-order.html?id=${orderId}'">
+
+            ⭐ قيّم المطعم
+
+        </button>
+
+        `;
+
+    }
+
+    html += `</div>`;
 
     orderDetails.innerHTML = html;
 
