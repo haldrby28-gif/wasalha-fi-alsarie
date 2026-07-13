@@ -15,41 +15,51 @@ const phone = document.getElementById("phone");
 const isOpen = document.getElementById("isOpen");
 const saveBtn = document.getElementById("saveBtn");
 
+if (!id) {
+    alert("معرف المطعم غير موجود");
+    window.location.href = "restaurants.html";
+}
+
 async function loadRestaurant() {
+    try {
+        const ref = doc(db, "restaurants", id);
+        const snap = await getDoc(ref);
 
-    const ref = doc(db, "restaurants", id);
-    const snap = await getDoc(ref);
+        if (!snap.exists()) {
+            alert("المطعم غير موجود");
+            window.location.href = "restaurants.html";
+            return;
+        }
 
-    if (!snap.exists()) {
-        alert("المطعم غير موجود");
-        window.location.href = "restaurants.html";
-        return;
+        const data = snap.data();
+
+        name.value = data.name || "";
+        category.value = data.category || "";
+        phone.value = data.phone || "";
+        isOpen.value = String(data.isOpen);
+
+    } catch (error) {
+        console.error(error);
+        alert("حدث خطأ أثناء تحميل بيانات المطعم");
     }
-
-    const data = snap.data();
-
-    name.value = data.name || "";
-    category.value = data.category || "";
-    phone.value = data.phone || "";
-    isOpen.value = String(data.isOpen);
-
 }
 
 loadRestaurant();
 
 saveBtn.addEventListener("click", async () => {
+    try {
+        await updateDoc(doc(db, "restaurants", id), {
+            name: name.value.trim(),
+            category: category.value.trim(),
+            phone: phone.value.trim(),
+            isOpen: isOpen.value === "true"
+        });
 
-    await updateDoc(doc(db, "restaurants", id), {
+        alert("تم حفظ التعديلات بنجاح");
+        window.location.href = "restaurants.html";
 
-        name: name.value,
-        category: category.value,
-        phone: phone.value,
-        isOpen: isOpen.value === "true"
-
-    });
-
-    alert("تم حفظ التعديلات بنجاح");
-
-    window.location.href = "restaurants.html";
-
+    } catch (error) {
+        console.error(error);
+        alert("حدث خطأ أثناء حفظ التعديلات");
+    }
 });
