@@ -5,21 +5,25 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
+    doc,
+    getDoc,
+    updateDoc,
     collection,
     query,
     where,
-    getDocs,
-    addDoc,
-    serverTimestamp
+    getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const form = document.getElementById("productForm");
+const params = new URLSearchParams(window.location.search);
+const productId = params.get("id");
 
+const form = document.getElementById("productForm");
 const nameInput = document.getElementById("name");
 const descriptionInput = document.getElementById("description");
 const priceInput = document.getElementById("price");
 const categoryInput = document.getElementById("category");
 const imageInput = document.getElementById("image");
+const preview = document.getElementById("preview");
 
 let restaurantId = "";
 
@@ -28,59 +32,90 @@ onAuthStateChanged(auth, async (user) => {
     if (!user) {
 
         location.href = "login.html";
-
         return;
 
     }
 
     try {
 
-        const q = query(
+        // معرفة المطعم الخاص بصاحب الحساب
+        const restaurantQuery = query(
             collection(db, "restaurants"),
             where("ownerUid", "==", user.uid)
         );
 
-        const snapshot = await getDocs(q);
+        const restaurantSnapshot = await getDocs(restaurantQuery);
 
-        if (snapshot.empty) {
+        if (restaurantSnapshot.empty) {
 
             alert("هذا الحساب لا يملك مطعماً.");
-
             location.href = "login.html";
-
             return;
 
         }
 
-        restaurantId = snapshot.docs[0].id;
+        restaurantId = restaurantSnapshot.docs[0].id;
+
+        loadProduct();
 
     } catch (error) {
 
         console.error(error);
-
-        alert("حدث خطأ أثناء تحميل بيانات المطعم.");
+        alert("حدث خطأ.");
 
     }
 
 });
 
+async function loadProduct() {
+
+    try {
+
+        const productRef = doc(db, "products", productId);
+        const productSnap = await getDoc(productRef);
+
+        if (!productSnap.exists()) {
+
+            alert("المنتج غير موجود.");
+            location.href = "products.html";
+            return;
+
+        }
+
+        const product = productSnap.data();
+
+        // التأكد أن المنتج يتبع هذا المطعم
+        if (product.restaurantId !== restaurantId) {
+
+            alert("غير مصرح لك بتعديل هذا المنتج.");
+            location.href = "products.html";
+            return;
+
+        }
+
+        nameInput.value = product.name || "";
+        descriptionInput.value = product.description || "";
+        priceInput.value = product.price || "";
+        categoryInput.value = product.category || "";
+        imageInput.value = product.image || "";
+
+        preview.src = product.image || "";
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+
+}
+
 form.addEventListener("submit", async (e) => {
 
     e.preventDefault();
 
-    if (!restaurantId) {
-
-        alert("لم يتم العثور على المطعم.");
-
-        return;
-
-    }
-
     try {
 
-        await addDoc(collection(db, "products"), {
-
-            restaurantId: restaurantId,
+        await updateDoc(doc(db, "products", productId), {
 
             name: nameInput.value.trim(),
 
@@ -90,15 +125,11 @@ form.addEventListener("submit", async (e) => {
 
             category: categoryInput.value.trim(),
 
-            image: imageInput.value.trim(),
-
-            isAvailable: true,
-
-            createdAt: serverTimestamp()
+            image: imageInput.value.trim()
 
         });
 
-        alert("✅ تم إضافة المنتج بنجاح.");
+        alert("✅ تم تحديث المنتج بنجاح.");
 
         location.href = "products.html";
 
@@ -106,7 +137,7 @@ form.addEventListener("submit", async (e) => {
 
         console.error(error);
 
-        alert("حدث خطأ أثناء إضافة المنتج.");
+        alert("حدث خطأ أثناء التعديل.");
 
     }
 
