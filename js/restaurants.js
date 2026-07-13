@@ -1,68 +1,95 @@
 import { db } from "../../js/firebase.js";
 
 import {
-  collection,
-  getDocs,
-  deleteDoc,
-  doc
+    collection,
+    onSnapshot,
+    deleteDoc,
+    doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const table = document.getElementById("restaurantsTable");
+const tbody = document.querySelector("#restaurantsTable tbody");
+const searchInput = document.getElementById("searchRestaurant");
 
-async function loadRestaurants() {
+let restaurants = [];
 
-  table.innerHTML = "";
+// تحميل المطاعم مباشرة من Firebase
+onSnapshot(collection(db, "restaurants"), (snapshot) => {
 
-  const snapshot = await getDocs(collection(db, "restaurants"));
+    restaurants = [];
 
-  snapshot.forEach((restaurant) => {
+    snapshot.forEach((restaurant) => {
 
-    const data = restaurant.data();
+        restaurants.push({
+            id: restaurant.id,
+            ...restaurant.data()
+        });
 
-    table.innerHTML += `
-      <tr>
-        <td>
-          <img src="${data.image || 'https://via.placeholder.com/80'}"
-               width="80"
-               height="60"
-               style="border-radius:8px;">
-        </td>
+    });
 
-        <td>${data.name}</td>
+    renderRestaurants(restaurants);
 
-        <td>${data.category}</td>
+});
 
-        <td>⭐ ${data.rating ?? 0}</td>
+// عرض المطاعم
+function renderRestaurants(list) {
 
-        <td>${data.isOpen ? "🟢 مفتوح" : "🔴 مغلق"}</td>
+    tbody.innerHTML = "";
 
-        <td>
-          <button class="action edit">
-            تعديل
-          </button>
+    list.forEach((restaurant) => {
 
-          <button class="action delete"
-            onclick="deleteRestaurant('${restaurant.id}')">
-            حذف
-          </button>
-        </td>
-      </tr>
-    `;
+        tbody.innerHTML += `
+        <tr>
 
-  });
+            <td>${restaurant.name || ""}</td>
+
+            <td>${restaurant.category || ""}</td>
+
+            <td>${restaurant.phone || "-"}</td>
+
+            <td>${restaurant.isOpen ? "🟢 مفتوح" : "🔴 مغلق"}</td>
+
+            <td>
+
+                <button onclick="editRestaurant('${restaurant.id}')">
+                ✏️ تعديل
+                </button>
+
+                <button onclick="deleteRestaurant('${restaurant.id}')">
+                🗑️ حذف
+                </button>
+
+            </td>
+
+        </tr>
+        `;
+
+    });
 
 }
 
-window.deleteRestaurant = async function(id){
+// البحث
+searchInput.addEventListener("input", () => {
 
-const ok = confirm("هل تريد حذف المطعم؟");
+    const keyword = searchInput.value.toLowerCase();
 
-if(!ok) return;
+    const filtered = restaurants.filter(r =>
+        (r.name || "").toLowerCase().includes(keyword)
+    );
 
-await deleteDoc(doc(db,"restaurants",id));
+    renderRestaurants(filtered);
 
-loadRestaurants();
+});
 
-}
+// حذف مطعم
+window.deleteRestaurant = async (id) => {
 
-loadRestaurants();
+    if (!confirm("هل تريد حذف هذا المطعم؟")) return;
+
+    await deleteDoc(doc(db, "restaurants", id));
+
+};
+
+// تعديل (سننفذه لاحقًا)
+window.editRestaurant = (id) => {
+
+    alert("سيتم إضافة صفحة
