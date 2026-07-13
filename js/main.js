@@ -10,6 +10,7 @@ const search = document.getElementById("search");
 
 let restaurants = [];
 
+// تحميل المطاعم من Firestore
 onSnapshot(collection(db, "restaurants"), (snapshot) => {
 
     restaurants = [];
@@ -27,51 +28,54 @@ onSnapshot(collection(db, "restaurants"), (snapshot) => {
 
 });
 
+// عرض المطاعم
 function renderRestaurants(list) {
 
     restaurantsDiv.innerHTML = "";
 
     if (list.length === 0) {
-
-        restaurantsDiv.innerHTML = "<p>لا توجد مطاعم.</p>";
+        restaurantsDiv.innerHTML = "<p style='text-align:center'>لا توجد مطاعم.</p>";
         return;
-
     }
 
     list.forEach((restaurant) => {
 
         restaurantsDiv.innerHTML += `
+        <div class="restaurant-card">
 
-<div class="restaurant-card">
+            <img
+                src="${restaurant.image}"
+                alt="${restaurant.name}"
+                style="width:100%;height:180px;object-fit:cover;border-radius:10px;">
 
-<h3>${restaurant.name}</h3>
+            <h3>${restaurant.name}</h3>
 
-<p>${restaurant.category || ""}</p>
+            <p>🍽️ ${restaurant.category}</p>
 
-<p>${restaurant.isOpen ? "🟢 مفتوح" : "🔴 مغلق"}</p>
+            <p>⭐ ${restaurant.rating ?? "لا يوجد تقييم"}</p>
 
-<button onclick="location.href='restaurant.html?id=${restaurant.id}'">
+            <p>🚚 ${restaurant.deliveryTime}</p>
 
-عرض المنتجات
+            <p>${restaurant.isOpen ? "🟢 مفتوح الآن" : "🔴 مغلق الآن"}</p>
 
-</button>
+            <button onclick="location.href='restaurant.html?id=${restaurant.id}'">
+                عرض المنتجات
+            </button>
 
-</div>
-
-`;
+        </div>
+        `;
 
     });
 
 }
 
+// البحث
 search.addEventListener("input", () => {
 
     const value = search.value.toLowerCase();
 
-    const filtered = restaurants.filter(r =>
-        (r.name || "").toLowerCase().includes(value)
-    );
+    const filtered = restaurants.filter((restaurant) => {
 
-    renderRestaurants(filtered);
-
-});
+        return (restaurant.name || "")
+            .toLowerCase()
+           
