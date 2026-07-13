@@ -1,12 +1,12 @@
 import { db } from "./firebase.js";
 
 import {
-  doc,
-  getDoc,
-  collection,
-  query,
-  where,
-  getDocs
+    doc,
+    getDoc,
+    collection,
+    query,
+    where,
+    getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const params = new URLSearchParams(window.location.search);
@@ -23,7 +23,7 @@ async function loadRestaurant() {
         return;
     }
 
-    // بيانات المطعم
+    // جلب بيانات المطعم
     const restaurantRef = doc(db, "restaurants", restaurantId);
     const restaurantSnap = await getDoc(restaurantRef);
 
@@ -39,8 +39,10 @@ async function loadRestaurant() {
     restaurantInfo.innerHTML = `
         <div class="restaurant-card">
 
-            <img src="${restaurant.image}"
-                 style="width:100%;height:200px;object-fit:cover;border-radius:10px;">
+            <img
+                src="${restaurant.image}"
+                alt="${restaurant.name}"
+                style="width:100%;height:200px;object-fit:cover;border-radius:10px;">
 
             <h3>${restaurant.name}</h3>
 
@@ -55,7 +57,7 @@ async function loadRestaurant() {
         </div>
     `;
 
-    // المنتجات
+    // جلب منتجات المطعم
     const q = query(
         collection(db, "products"),
         where("restaurantId", "==", restaurantId)
@@ -66,9 +68,17 @@ async function loadRestaurant() {
     productsDiv.innerHTML = "";
 
     if (productsSnap.empty) {
-        productsDiv.innerHTML = "<p style='padding:15px'>لا توجد منتجات.</p>";
+
+        productsDiv.innerHTML = `
+            <p style="padding:20px;text-align:center">
+                لا توجد منتجات لهذا المطعم.
+            </p>
+        `;
+
         return;
     }
+
+    const products = [];
 
     productsSnap.forEach((docSnap) => {
 
@@ -77,11 +87,19 @@ async function loadRestaurant() {
             ...docSnap.data()
         };
 
+        products.push(product);
+
         productsDiv.innerHTML += `
 
         <div class="restaurant-card">
 
-            <img src="${product.image}"
-                 style="width:100%;height:170px;object-fit:cover;border-radius:10px;">
+            <img
+                src="${product.image}"
+                alt="${product.name}"
+                style="width:100%;height:170px;object-fit:cover;border-radius:10px;">
 
-            <h3>${product.name}</
+            <h3>${product.name}</h3>
+
+            <p>💰 ${product.price} جنيه</p>
+
+            <button class="
