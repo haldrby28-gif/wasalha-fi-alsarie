@@ -1,95 +1,87 @@
-import { db } from "../../js/firebase.js";
+import { db } from "./firebase.js";
 
 import {
-    collection,
-    onSnapshot,
-    deleteDoc,
-    doc
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const tbody = document.querySelector("#restaurantsTable tbody");
-const searchInput = document.getElementById("searchRestaurant");
+const params = new URLSearchParams(window.location.search);
+const restaurantId = params.get("id");
 
-let restaurants = [];
+const restaurantName = document.getElementById("restaurantName");
+const restaurantInfo = document.getElementById("restaurantInfo");
+const productsDiv = document.getElementById("products");
 
-// تحميل المطاعم مباشرة من Firebase
-onSnapshot(collection(db, "restaurants"), (snapshot) => {
+async function loadRestaurant() {
 
-    restaurants = [];
+    if (!restaurantId) {
+        restaurantName.textContent = "المطعم غير موجود";
+        return;
+    }
 
-    snapshot.forEach((restaurant) => {
+    // بيانات المطعم
+    const restaurantRef = doc(db, "restaurants", restaurantId);
+    const restaurantSnap = await getDoc(restaurantRef);
 
-        restaurants.push({
-            id: restaurant.id,
-            ...restaurant.data()
-        });
+    if (!restaurantSnap.exists()) {
+        restaurantName.textContent = "المطعم غير موجود";
+        return;
+    }
 
-    });
+    const restaurant = restaurantSnap.data();
 
-    renderRestaurants(restaurants);
+    restaurantName.textContent = restaurant.name;
 
-});
+    restaurantInfo.innerHTML = `
+        <div class="restaurant-card">
 
-// عرض المطاعم
-function renderRestaurants(list) {
+            <img src="${restaurant.image}"
+                 style="width:100%;height:200px;object-fit:cover;border-radius:10px;">
 
-    tbody.innerHTML = "";
+            <h3>${restaurant.name}</h3>
 
-    list.forEach((restaurant) => {
+            <p>🍽️ ${restaurant.category}</p>
 
-        tbody.innerHTML += `
-        <tr>
+            <p>⭐ ${restaurant.rating}</p>
 
-            <td>${restaurant.name || ""}</td>
+            <p>🚚 ${restaurant.deliveryTime}</p>
 
-            <td>${restaurant.category || ""}</td>
+            <p>${restaurant.isOpen ? "🟢 مفتوح الآن" : "🔴 مغلق الآن"}</p>
 
-            <td>${restaurant.phone || "-"}</td>
+        </div>
+    `;
 
-            <td>${restaurant.isOpen ? "🟢 مفتوح" : "🔴 مغلق"}</td>
-
-            <td>
-
-                <button onclick="editRestaurant('${restaurant.id}')">
-                ✏️ تعديل
-                </button>
-
-                <button onclick="deleteRestaurant('${restaurant.id}')">
-                🗑️ حذف
-                </button>
-
-            </td>
-
-        </tr>
-        `;
-
-    });
-
-}
-
-// البحث
-searchInput.addEventListener("input", () => {
-
-    const keyword = searchInput.value.toLowerCase();
-
-    const filtered = restaurants.filter(r =>
-        (r.name || "").toLowerCase().includes(keyword)
+    // المنتجات
+    const q = query(
+        collection(db, "products"),
+        where("restaurantId", "==", restaurantId)
     );
 
-    renderRestaurants(filtered);
+    const productsSnap = await getDocs(q);
 
-});
+    productsDiv.innerHTML = "";
 
-// حذف مطعم
-window.deleteRestaurant = async (id) => {
+    if (productsSnap.empty) {
+        productsDiv.innerHTML = "<p style='padding:15px'>لا توجد منتجات.</p>";
+        return;
+    }
 
-    if (!confirm("هل تريد حذف هذا المطعم؟")) return;
+    productsSnap.forEach((docSnap) => {
 
-    await deleteDoc(doc(db, "restaurants", id));
+        const product = {
+            id: docSnap.id,
+            ...docSnap.data()
+        };
 
-};
-window.editRestaurant = (id) => {
+        productsDiv.innerHTML += `
 
-    window.location.href = `edit-restaurant.html?id=${id}`;
+        <div class="restaurant-card">
 
-};
+            <img src="${product.image}"
+                 style="width:100%;height:170px;object-fit:cover;border-radius:10px;">
+
+            <h3>${product.name}</
