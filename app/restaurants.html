@@ -2,36 +2,63 @@
 <html lang="ar" dir="rtl">
 
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>المطعم</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="stylesheet" href="style.css">
+    <title>المطاعم</title>
+
+    <link rel="stylesheet" href="../css/style.css">
 
 </head>
 
 <body>
 
 <header class="header">
-<h2 id="restaurantName">اسم المطعم</h2>
+
+    <h2>🍔 المطاعم</h2>
+
 </header>
 
-<div id="restaurantInfo"></div>
+<div style="padding:15px;">
 
-<h3 style="padding:15px;">المنتجات</h3>
+    <input
+        id="search"
+        type="text"
+        placeholder="ابحث عن مطعم..."
+        style="width:100%;padding:12px;border-radius:10px;border:1px solid #ddd;">
 
-<div id="products"></div>
+</div>
+
+<div id="restaurants" class="restaurants-grid">
+
+</div>
 
 <nav class="bottom-nav">
-<a href="home.html">🏠<br>الرئيسية</a>
-<a href="restaurants.html">🍔<br>المطاعم</a>
-<a href="cart.html">🛒<br>السلة</a>
-<a href="orders.html">📦<br>طلباتي</a>
-<a href="profile.html">👤<br>حسابي</a>
+
+    <a href="home.html">
+        🏠<br>الرئيسية
+    </a>
+
+    <a href="restaurants.html" class="active">
+        🍔<br>المطاعم
+    </a>
+
+    <a href="cart.html">
+        🛒<br>السلة
+    </a>
+
+    <a href="orders.html">
+        📦<br>طلباتي
+    </a>
+
+    <a href="profile.html">
+        👤<br>حسابي
+    </a>
+
 </nav>
 
-<script type="module" src="../js/restaurant.js"></script>
+<script type="module" src="../js/app/restaurants.js"></script>
 
 </body>
 
