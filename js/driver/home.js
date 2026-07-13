@@ -1,5 +1,4 @@
-import { auth } from "../firebase.js";
-import { db } from "../firebase.js";
+import { auth, db } from "../firebase.js";
 
 import {
     onAuthStateChanged
@@ -19,6 +18,8 @@ const driverName = document.getElementById("driverName");
 const driverStatus = document.getElementById("driverStatus");
 const ordersContainer = document.getElementById("ordersContainer");
 
+let currentDriverId = "";
+
 onAuthStateChanged(auth, async (user) => {
 
     if (!user) {
@@ -26,11 +27,12 @@ onAuthStateChanged(auth, async (user) => {
         return;
     }
 
-    const driverRef = doc(db, "drivers", user.uid);
-    const driverSnap = await getDoc(driverRef);
+    currentDriverId = user.uid;
+
+    const driverSnap = await getDoc(doc(db, "drivers", user.uid));
 
     if (!driverSnap.exists()) {
-        alert("هذا الحساب ليس مندوباً.");
+        alert("هذا الحساب ليس حساب مندوب.");
         window.location.href = "login.html";
         return;
     }
@@ -42,11 +44,13 @@ onAuthStateChanged(auth, async (user) => {
     driverStatus.textContent =
         driver.isOnline ? "🟢 متصل" : "🔴 غير متصل";
 
-    loadOrders(user.uid);
+    loadOrders();
 
 });
 
-async function loadOrders(driverId) {
+async function loadOrders() {
+
+    ordersContainer.innerHTML = "<p>جاري تحميل الطلبات...</p>";
 
     const q = query(
         collection(db, "orders"),
@@ -60,29 +64,54 @@ async function loadOrders(driverId) {
     if (snapshot.empty) {
 
         ordersContainer.innerHTML = `
-            <p style="text-align:center;">
-                لا توجد طلبات جديدة.
-            </p>
+        <p style="text-align:center">
+            لا توجد طلبات جديدة
+        </p>
         `;
 
         return;
     }
 
-    snapshot.forEach((docSnap) => {
+    for (const orderDoc of snapshot.docs) {
 
-        const order = docSnap.data();
+        const order = orderDoc.data();
+
+        let userName = order.userId;
+        let restaurantName = order.restaurantId;
+
+        try {
+
+            const userSnap = await getDoc(doc(db, "users", order.userId));
+
+            if (userSnap.exists()) {
+                userName = userSnap.data().name;
+            }
+
+        } catch (e) {}
+
+        try {
+
+            const restaurantSnap = await getDoc(doc(db, "restaurants", order.restaurantId));
+
+            if (restaurantSnap.exists()) {
+                restaurantName = restaurantSnap.data().name;
+            }
+
+        } catch (e) {}
 
         ordersContainer.innerHTML += `
 
         <div class="order-card">
 
-            <h3>📦 طلب #${docSnap.id}</h3>
+            <h3>📦 الطلب #${orderDoc.id}</h3>
+
+            <p>👤 العميل: ${userName}</p>
+
+            <p>🏪 المطعم: ${restaurantName}</p>
 
             <p>💰 الإجمالي: ${order.total} جنيه</p>
 
-            <p>👤 العميل: ${order.userId}</p>
-
-            <button onclick="acceptOrder('${docSnap.id}','${driverId}')">
+            <button onclick="acceptOrder('${orderDoc.id}')">
                 استلام الطلب
             </button>
 
@@ -90,39 +119,37 @@ async function loadOrders(driverId) {
 
         `;
 
-    });
+    }
 
 }
 
-window.acceptOrder = async function(orderId, driverId) {
+window.acceptOrder = async function(orderId) {
 
     try {
 
         await updateDoc(doc(db, "orders", orderId), {
 
-            status: "delivering",
-
-            driverId: driverId
+            driverId: currentDriverId,
+            status: "delivering"
 
         });
 
-        await updateDoc(doc(db, "drivers", driverId), {
+        await updateDoc(doc(db, "drivers", currentDriverId), {
 
             currentOrder: orderId,
-
             isAvailable: false
 
         });
 
-        alert("✅ تم استلام الطلب.");
+        alert("✅ تم استلام الطلب بنجاح");
 
-        location.reload();
+        loadOrders();
 
     } catch (error) {
 
         console.error(error);
 
-        alert("حدث خطأ أثناء استلام الطلب.");
+        alert("حدث خطأ أثناء استلام الطلب");
 
     }
 
