@@ -2,18 +2,43 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches:
-      - main  # هذا يخبر GitHub أن يعمل عند أي تحديث لفرع main
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }} # هذا توقيع داخلي تلقائي من GitHub ولا يحتاج منك إدخال أي مفاتيح
-          publish_dir: .  # يقوم بنشر الملفات الموجودة في المجلد الرئيسي (حيث يوجد index.html)
+          path: '.'
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+  # تم تعطيل خطوة Datadog لتجنب خطأ المفاتيح المفقودة
+  # synthetic-tests:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Run Datadog Synthetic tests
+  #       run: echo "Datadog tests are currently disabled."
