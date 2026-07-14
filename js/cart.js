@@ -3,28 +3,138 @@ import { db, auth } from "./firebase.js";
 import {
     collection,
     addDoc,
-    serverTimestamp
+    serverTimestamp,
+    query,
+    where,
+    getDocs,
+    doc,
+    updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const cartItems = document.getElementById("cartItems");
 const subtotal = document.getElementById("subtotal");
-const delivery = document.getElementById("delivery");
+const delivery = document.getElementById("deliveryFee");
 const total = document.getElementById("total");
 const checkoutBtn = document.getElementById("checkoutBtn");
 const address = document.getElementById("address");
 const notes = document.getElementById("notes");
 
+const couponCode = document.getElementById("couponCode");
+const applyCoupon = document.getElementById("applyCoupon");
+
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-// ضمان وجود quantity
+let discount = 0;
+let couponId = null;
+
 cart = cart.map(item => ({
     ...item,
     quantity: item.quantity || 1
 }));
 
 function saveCart() {
+
     localStorage.setItem("cart", JSON.stringify(cart));
+
 }
+
+function calculateTotal() {
+
+    let sub = 0;
+
+    cart.forEach(item => {
+
+        sub += Number(item.price) * item.quantity;
+
+    });
+
+    subtotal.textContent = sub;
+
+    delivery.textContent = 20;
+
+    total.textContent = (sub + 20) - discount;
+
+}
+
+async function applyCouponCode() {
+
+    const code = couponCode.value.trim().toUpperCase();
+
+    if (code === "") {
+
+        alert("أدخل كود الخصم");
+
+        return;
+
+    }
+
+    const q = query(
+        collection(db, "coupons"),
+        where("code", "==", code),
+        where("active", "==", true)
+    );
+
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+
+        alert("الكوبون غير موجود");
+
+        return;
+
+    }
+
+    const couponDoc = snapshot.docs[0];
+
+    const coupon = couponDoc.data();
+
+    couponId = couponDoc.id;
+
+    const now = new Date();
+
+    if (coupon.expireDate && coupon.expireDate.toDate() < now) {
+
+        alert("انتهت صلاحية الكوبون");
+
+        return;
+
+    }
+
+    if (coupon.usedCount >= coupon.usageLimit) {
+
+        alert("تم استهلاك الكوبون بالكامل");
+
+        return;
+
+    }
+
+    let sub = Number(subtotal.textContent);
+
+    if (sub < coupon.minimumOrder) {
+
+        alert("الحد الأدنى لاستخدام الكوبون هو " + coupon.minimumOrder + " جنيه");
+
+        return;
+
+    }
+
+    if (coupon.type === "percent") {
+
+        discount = (sub * coupon.discount) / 100;
+
+    } else {
+
+        discount = coupon.discount;
+
+    }
+
+    calculateTotal();
+
+    alert("✅ تم تطبيق الكوبون بنجاح");
+
+}
+
+applyCoupon.addEventListener("click", applyCouponCode);
 
 function renderCart() {
 
@@ -33,25 +143,22 @@ function renderCart() {
     if (cart.length === 0) {
 
         cartItems.innerHTML = `
-            <p style="text-align:center;padding:30px;">
-                🛒 السلة فارغة
-            </p>
+        <p style="text-align:center;padding:30px;">
+            🛒 السلة فارغة
+        </p>
         `;
 
         subtotal.textContent = 0;
-        delivery.textContent = 20;
-        total.textContent = 20;
+        deliveryFee: parseFloat(delivery.textContent),
+            total.textContent = 20; 
 
         return;
-    }
 
-    let sub = 0;
+    }
 
     cart.forEach((item, index) => {
 
         const itemTotal = Number(item.price) * item.quantity;
-
-        sub += itemTotal;
 
         cartItems.innerHTML += `
 
@@ -83,9 +190,7 @@ function renderCart() {
 
     });
 
-    subtotal.textContent = sub;
-    delivery.textContent = 20;
-    total.textContent = sub + 20;
+    calculateTotal();
 
 }
 
@@ -175,30 +280,14 @@ checkoutBtn.addEventListener("click", async () => {
 
             deliveryFee: Number(delivery.textContent),
 
-            total: Number(total.textContent),
+discount: discount,
 
-            driverId: "",
+couponId: couponId || "",
 
-            status: "pending",
+total: Number(total.textContent),
 
-            createdAt: serverTimestamp()
+driverId: "",
 
-        });
+status: "pending",
 
-        localStorage.removeItem("cart");
-
-        alert("✅ تم إرسال الطلب بنجاح");
-
-        window.location.href = "orders.html";
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert("حدث خطأ أثناء إرسال الطلب");
-
-    }
-
-});
-
-renderCart();
+createdAt: serverTimestamp()
