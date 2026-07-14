@@ -1,5 +1,158 @@
-<script type="module" src="js/drivers.js"></script>
-<script type="module" src="js/auth-guard.js"></script>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>إدارة المندوبين</title>
+
+<link rel="stylesheet" href="../css/admin.css">
+
+<style>
+
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:#f5f5f5;
+}
+
+header{
+background:#ff6b00;
+color:#fff;
+padding:18px;
+text-align:center;
+font-size:22px;
+font-weight:bold;
+}
+
+.container{
+width:95%;
+margin:20px auto;
+}
+
+.top-bar{
+display:flex;
+gap:10px;
+margin-bottom:15px;
+}
+
+#searchDriver{
+flex:1;
+padding:12px;
+border:1px solid #ddd;
+border-radius:8px;
+font-size:16px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:#fff;
+box-shadow:0 2px 10px rgba(0,0,0,.1);
+}
+
+th{
+background:#ff6b00;
+color:#fff;
+padding:14px;
+}
+
+td{
+padding:12px;
+text-align:center;
+border-bottom:1px solid #eee;
+}
+
+.status{
+padding:5px 10px;
+border-radius:8px;
+color:#fff;
+font-weight:bold;
+}
+
+.online{
+background:#4CAF50;
+}
+
+.offline{
+background:#F44336;
+}
+
+button{
+padding:8px 12px;
+margin:2px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+color:white;
+}
+
+.toggle{
+background:#2196F3;
+}
+
+.delete{
+background:#F44336;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+🛵 إدارة المندوبين
+
+</header>
+
+<div class="container">
+
+<div class="top-bar">
+
+<input
+id="searchDriver"
+type="text"
+placeholder="🔍 البحث عن مندوب">
+
+</div>
+
+<table id="driversTable">
+
+<thead>
+
+<tr>
+
+<th>الاسم</th>
+
+<th>الهاتف</th>
+
+<th>الحالة</th>
+
+<th>الطلب الحالي</th>
+
+<th>الإجراءات</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+</tbody>
+
+</table>
+
+</div>
+
+<script type="module" src="../js/admin/drivers.js"></script>
+
+<script type="module" src="../js/auth-guard.js"></script>
 
 </body>
+
 </html>
