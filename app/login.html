@@ -101,23 +101,24 @@
   ليس لديك حساب؟ <a href="register.html">سجل الآن</a>
 </div>
 
-  <script>
-    function validateLogin() {
-      var email = document.getElementById("email").value;
-      var password = document.getElementById("password").value;
+  <script type="module">
+  // استيراد auth من ملف الإعدادات الذي أنشأناه
+  import { auth } from "./firebase/firebase-config.js";
+  import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-      // تحقق بسيط
-      if (email === "" || password === "") {
-        alert("يرجى ملء جميع الحقول");
-      } else if (email === "admin@test.com" && password === "1234") {
-        alert("تم تسجيل الدخول بنجاح!");
-        // تأكد من إنشاء صفحة home.html لاحقاً
-        window.location.href = "home.html"; 
-      } else {
-        alert("البريد الإلكتروني أو كلمة المرور غير صحيحة");
-      }
+  window.validateLogin = async function() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      alert("تم تسجيل الدخول بنجاح!");
+      window.location.href = "home.html";
+    } catch (error) {
+      alert("خطأ: تأكد من الإيميل وكلمة المرور.");
     }
-  </script>
+  };
+</script>
 
 </body>
 </html>
