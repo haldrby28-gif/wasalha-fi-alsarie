@@ -1,44 +1,60 @@
-
-import { db } from "../../js/firebase.js";
+import { db } from "../firebase.js";
 
 import {
-collection,
-getCountFromServer
+    collection,
+    getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const usersCount = document.getElementById("usersCount");
+const restaurantsCount = document.getElementById("restaurantsCount");
+const driversCount = document.getElementById("driversCount");
+const ordersCount = document.getElementById("ordersCount");
+const sales = document.getElementById("sales");
 
 async function loadDashboard() {
 
-try {
+    try {
 
-const users =
-await getCountFromServer(collection(db,"users"));
+        // المستخدمون
+        const usersSnap = await getDocs(collection(db, "users"));
+        usersCount.textContent = usersSnap.size;
 
-const restaurants =
-await getCountFromServer(collection(db,"restaurants"));
+        // المطاعم
+        const restaurantsSnap = await getDocs(collection(db, "restaurants"));
+        restaurantsCount.textContent = restaurantsSnap.size;
 
-const orders =
-await getCountFromServer(collection(db,"orders"));
+        // المندوبون
+        const driversSnap = await getDocs(collection(db, "drivers"));
+        driversCount.textContent = driversSnap.size;
 
-const drivers =
-await getCountFromServer(collection(db,"drivers"));
+        // الطلبات
+        const ordersSnap = await getDocs(collection(db, "orders"));
+        ordersCount.textContent = ordersSnap.size;
 
-document.getElementById("usersCount").textContent =
-users.data().count;
+        // إجمالي المبيعات
+        let totalSales = 0;
 
-document.getElementById("restaurantsCount").textContent =
-restaurants.data().count;
+        ordersSnap.forEach((docSnap) => {
 
-document.getElementById("ordersCount").textContent =
-orders.data().count;
+            const order = docSnap.data();
 
-document.getElementById("driversCount").textContent =
-drivers.data().count;
+            if (order.status === "completed") {
 
-} catch(error){
+                totalSales += Number(order.total || 0);
 
-console.error(error);
+            }
 
-}
+        });
+
+        sales.textContent = totalSales + " جنيه";
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("حدث خطأ أثناء تحميل الإحصائيات.");
+
+    }
 
 }
 
