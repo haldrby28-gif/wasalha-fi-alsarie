@@ -2,57 +2,119 @@
 <html lang="ar" dir="rtl">
 
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>إدارة المستخدمين</title>
 
-<link rel="stylesheet" href="css/admin.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
+    <title>إدارة المستخدمين</title>
 
-header{
-background:#ff6b00;
-color:white;
-padding:18px;
-text-align:center;
-font-size:22px;
-}
+    <link rel="stylesheet" href="../css/admin.css">
 
-table{
-width:100%;
-background:white;
-border-collapse:collapse;
-margin-top:20px;
-}
+    <style>
 
-th,td{
-padding:15px;
-border-bottom:1px solid #eee;
-text-align:center;
-}
+        body{
+            margin:0;
+            font-family:Arial,sans-serif;
+            background:#f5f5f5;
+        }
 
-th{
-background:#ff6b00;
-color:white;
-}
+        header{
+            background:#ff6b00;
+            color:#fff;
+            padding:18px;
+            text-align:center;
+            font-size:22px;
+            font-weight:bold;
+        }
 
-.status{
-padding:6px 10px;
-border-radius:8px;
-font-weight:bold;
-}
+        .container{
+            width:95%;
+            margin:20px auto;
+        }
 
-.active{
-background:#4CAF50;
-color:white;
-}
+        .top-bar{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:15px;
+            gap:10px;
+            flex-wrap:wrap;
+        }
 
-.inactive{
-background:#F44336;
-color:white;
-}
+        #searchUser{
+            flex:1;
+            min-width:220px;
+            padding:12px;
+            border:1px solid #ddd;
+            border-radius:8px;
+            font-size:16px;
+        }
 
-</style>
+        table{
+            width:100%;
+            border-collapse:collapse;
+            background:#fff;
+            border-radius:10px;
+            overflow:hidden;
+            box-shadow:0 2px 10px rgba(0,0,0,.1);
+        }
+
+        th{
+            background:#ff6b00;
+            color:white;
+            padding:15px;
+        }
+
+        td{
+            padding:14px;
+            border-bottom:1px solid #eee;
+            text-align:center;
+        }
+
+        tr:hover{
+            background:#fafafa;
+        }
+
+        .status{
+            padding:6px 10px;
+            border-radius:8px;
+            color:white;
+            font-size:14px;
+            font-weight:bold;
+        }
+
+        .active{
+            background:#4CAF50;
+        }
+
+        .inactive{
+            background:#F44336;
+        }
+
+        button{
+            padding:8px 12px;
+            border:none;
+            border-radius:6px;
+            cursor:pointer;
+            margin:2px;
+        }
+
+        .edit{
+            background:#2196F3;
+            color:white;
+        }
+
+        .delete{
+            background:#F44336;
+            color:white;
+        }
+
+        .toggle{
+            background:#4CAF50;
+            color:white;
+        }
+
+    </style>
 
 </head>
 
@@ -60,40 +122,53 @@ color:white;
 
 <header>
 
-إدارة المستخدمين
+👥 إدارة المستخدمين
 
 </header>
 
-<table>
+<div class="container">
 
-<thead>
+    <div class="top-bar">
 
-<tr>
+        <input
+            type="text"
+            id="searchUser"
+            placeholder="🔍 البحث عن مستخدم">
 
-<th>الاسم</th>
+    </div>
 
-<th>البريد الإلكتروني</th>
+    <table id="usersTable">
 
-<th>الدور</th>
+        <thead>
 
-<th>الحالة</th>
+            <tr>
 
-</tr>
+                <th>الاسم</th>
 
-</thead>
+                <th>البريد الإلكتروني</th>
 
-<tbody id="usersTable">
+                <th>الدور</th>
 
-</tbody>
+                <th>الحالة</th>
 
-</table>
+                <th>الإجراءات</th>
 
-<script type="module" src="js/users.js"></script>
-<script type="module" src="js/users.js"></script>
-<script type="module" src="js/auth-guard.js"></script>
+            </tr>
 
-</body>
-</html>
+        </thead>
+
+        <tbody>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+<script type="module" src="../js/admin/users.js"></script>
+
+<script type="module" src="../js/auth-guard.js"></script>
+
 </body>
 
 </html>
