@@ -264,30 +264,60 @@ checkoutBtn.addEventListener("click", async () => {
 
         await addDoc(collection(db, "orders"), {
 
-            userId: auth.currentUser.uid,
+    userId: auth.currentUser.uid,
 
-            restaurantId: cart[0].restaurantId || "",
+    restaurantId: cart[0].restaurantId || "",
 
-            restaurantName: cart[0].restaurantName || "",
+    restaurantName: cart[0].restaurantName || "",
 
-            items: cart,
+    items: cart,
 
-            address: address.value,
+    address: address.value,
 
-            notes: notes.value,
+    notes: notes.value,
 
-            subtotal: Number(subtotal.textContent),
+    subtotal: Number(subtotal.textContent),
 
-            deliveryFee: Number(delivery.textContent),
+    deliveryFee: Number(delivery.textContent),
 
-discount: discount,
+    discount: discount,
 
-couponId: couponId || "",
+    couponId: couponId || "",
 
-total: Number(total.textContent),
+    total: Number(total.textContent),
 
-driverId: "",
+    driverId: "",
 
-status: "pending",
+    status: "pending",
 
-createdAt: serverTimestamp()
+    createdAt: serverTimestamp()
+
+});
+
+if (couponId) {
+
+    const couponRef = doc(db, "coupons", couponId);
+
+    const couponSnap = await getDocs(
+        query(collection(db, "coupons"), where("__name__", "==", couponId))
+    );
+
+    if (!couponSnap.empty) {
+
+        const data = couponSnap.docs[0].data();
+
+        await updateDoc(couponRef, {
+
+            usedCount: (data.usedCount || 0) + 1
+
+        });
+
+    }
+
+}
+
+localStorage.removeItem("cart");
+
+alert("✅ تم إرسال الطلب بنجاح");
+
+window.location.href = "orders.html";
