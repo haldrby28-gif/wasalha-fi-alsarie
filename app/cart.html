@@ -7,77 +7,151 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>السلة</title>
+<title>السلة - وصلها في السريع</title>
 
 <link rel="stylesheet" href="style.css">
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+background:#f5f5f5;
+padding:15px;
+}
+
+h2{
+text-align:center;
+margin-bottom:20px;
+}
+
+#cartItems{
+margin-bottom:20px;
+}
+
+.cart-item{
+background:#fff;
+padding:15px;
+margin-bottom:10px;
+border-radius:10px;
+box-shadow:0 2px 5px rgba(0,0,0,.1);
+}
+
+.summary{
+background:#fff;
+padding:15px;
+border-radius:10px;
+margin-top:20px;
+}
+
+.summary p{
+display:flex;
+justify-content:space-between;
+margin:10px 0;
+}
+
+input,
+textarea,
+button{
+width:100%;
+padding:12px;
+margin-top:12px;
+border-radius:8px;
+border:1px solid #ddd;
+font-size:16px;
+}
+
+button{
+background:#ff6b00;
+color:#fff;
+border:none;
+cursor:pointer;
+}
+
+button:hover{
+background:#e65c00;
+}
+
+</style>
 
 </head>
 
 <body>
 
-<header class="header">
-
-<h2>🛒 سلة المشتريات</h2>
-
-</header>
+<h2>🛒 السلة</h2>
 
 <div id="cartItems"></div>
 
-<div class="cart-summary">
+<div class="summary">
 
-<h3>ملخص الطلب</h3>
+<p>
 
-<p>إجمالي المنتجات:
-<span id="subtotal">0</span> جنيه
+<span>الإجمالي</span>
+
+<strong id="subtotal">0 ج.م</strong>
+
 </p>
 
-<p>رسوم التوصيل:
-<span id="delivery">20</span> جنيه
+<p>
+
+<span>رسوم التوصيل</span>
+
+<strong id="deliveryFee">20 ج.م</strong>
+
 </p>
 
-<h3>
+<p>
 
-الإجمالي:
+<span>الخصم</span>
 
-<span id="total">20</span>
+<strong id="discount">0 ج.م</strong>
 
-جنيه
+</p>
 
-</h3>
+<hr>
 
-<button id="checkoutBtn">
+<p>
+
+<span>الإجمالي النهائي</span>
+
+<strong id="total">20 ج.م</strong>
+
+</p>
+
+</div>
+
 <h3>عنوان التوصيل</h3>
 
 <input
 type="text"
 id="address"
-placeholder="اكتب عنوان التوصيل"
-style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin-bottom:15px;">
+placeholder="اكتب عنوان التوصيل">
 
-<textarea
-id="notes"
-placeholder="ملاحظات للمندوب (اختياري)"
-style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;height:80px;margin-bottom:15px;"></textarea>
+<h3>كود الخصم</h3>
 
-  تأكيد الطلب
+<input
+type="text"
+id="couponCode"
+placeholder="أدخل كود الخصم">
+
+<button id="applyCoupon">
+
+تطبيق الكوبون
 
 </button>
 
-</div>
+<h3>ملاحظات</h3>
 
-<nav class="bottom-nav">
+<textarea
+id="notes"
+rows="4"
+placeholder="ملاحظات للمندوب (اختياري)">
+</textarea>
 
-<a href="home.html">🏠<br>الرئيسية</a>
+<button id="checkoutBtn">
 
-<a href="restaurants.html">🍔<br>المطاعم</a>
+تأكيد الطلب
 
-<a href="cart.html">🛒<br>السلة</a>
-
-<a href="orders.html">📦<br>طلباتي</a>
-
-<a href="profile.html">👤<br>حسابي</a>
-
-</nav>
+</button>
 
 <script type="module" src="../js/cart.js"></script>
 
