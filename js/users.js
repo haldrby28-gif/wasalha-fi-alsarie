@@ -1,44 +1,51 @@
-import { db } from "../../js/firebase.js";
+import { db } from "../firebase.js";
 
 import {
-collection,
-onSnapshot
+    collection,
+    getDocs,
+    doc,
+    updateDoc,
+    deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const table = document.getElementById("usersTable");
+const tbody = document.querySelector("#usersTable tbody");
+const searchInput = document.getElementById("searchUser");
 
-onSnapshot(collection(db,"users"),(snapshot)=>{
+let users = [];
 
-table.innerHTML="";
+async function loadUsers() {
 
-snapshot.forEach((user)=>{
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="5">جاري تحميل المستخدمين...</td>
+        </tr>
+    `;
 
-const data=user.data();
+    users = [];
 
-table.innerHTML += `
+    try {
 
-<tr>
+        const snapshot = await getDocs(collection(db, "users"));
 
-<td>${data.name || "-"}</td>
+        snapshot.forEach((docSnap) => {
 
-<td>${data.email || "-"}</td>
+            users.push({
 
-<td>${data.role || "customer"}</td>
+                id: docSnap.id,
 
-<td>
+                ...docSnap.data()
 
-<span class="status ${data.active ? "active":"inactive"}">
+            });
 
-${data.active ? "نشط":"موقوف"}
+        });
 
-</span>
+        renderUsers(users);
 
-</td>
+    } catch (error) {
 
-</tr>
+        console.error(error);
 
-`;
-
-});
-
-});
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5">حدث خطأ أثناء تحميل البيانات.</td>
+           
