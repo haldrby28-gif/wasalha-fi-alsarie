@@ -1,4 +1,3 @@
-alert("تم تحميل login.js");
 import { auth, db } from "../../js/firebase.js";
 
 import {
@@ -12,6 +11,7 @@ import {
 
 async function validateLogin() {
 
+    console.log("Firebase Loaded", auth, db);
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
 
