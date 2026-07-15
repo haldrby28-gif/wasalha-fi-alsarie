@@ -1,3 +1,4 @@
+alert("تم تحميل login.js");
 import { auth, db } from "../../js/firebase.js";
 
 import {
