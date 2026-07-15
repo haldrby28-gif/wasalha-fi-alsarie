@@ -15,7 +15,7 @@ async function validateLogin() {
     const password = document.getElementById("password").value;
 
     if (!email || !password) {
-        alert("يرجى إدخال البريد الإلكتروني وكلمة المرور.");
+        alert("يرجى إدخال البريد الإلكتروني وكلمة المرور");
         return;
     }
 
@@ -29,47 +29,53 @@ async function validateLogin() {
 
         const user = userCredential.user;
 
-        const userSnap = await getDoc(doc(db, "users", user.uid));
+        const userRef = doc(db, "users", user.uid);
+
+        const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {
-            alert("هذا الحساب غير موجود في قاعدة البيانات.");
+            alert("الحساب غير موجود في قاعدة البيانات");
             return;
         }
 
         const userData = userSnap.data();
 
+        alert("مرحباً " + userData.name);
+
         switch (userData.role) {
 
             case "admin":
-                window.location.href = "../admin/admin-dashboard.html";
+                window.location.href = "../admin/dashboard.html";
                 break;
 
             case "restaurant":
-                window.location.href = "../restaurant/restaurant-panel.html";
+                window.location.href = "../restaurant/dashboard.html";
                 break;
 
             case "driver":
-                window.location.href = "../driver/driver-app.html";
-                break;
-
-            case "user":
-                window.location.href = "home.html";
+                window.location.href = "../driver/index.html";
                 break;
 
             default:
-                alert("صلاحية المستخدم غير صحيحة.");
+                window.location.href = "home.html";
+                break;
+
         }
 
     } catch (error) {
 
         console.error(error);
 
-        alert(error.message);
+        alert("خطأ: " + error.message);
 
     }
 
 }
 
-document
-    .getElementById("loginBtn")
-    .addEventListener("click", validateLogin);
+document.addEventListener("DOMContentLoaded", () => {
+
+    document
+        .getElementById("loginBtn")
+        .addEventListener("click", validateLogin);
+
+});
