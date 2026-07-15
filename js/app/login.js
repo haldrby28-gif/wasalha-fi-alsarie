@@ -36,5 +36,7 @@ window.validateLogin = async function() {
         }
     } catch (error) {
         alert("خطأ: " + error.message);
+
+       document.getElementById("loginBtn").addEventListener("click", validateLogin); 
     }
 };
