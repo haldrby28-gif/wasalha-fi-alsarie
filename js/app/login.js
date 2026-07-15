@@ -36,8 +36,8 @@ window.validateLogin = async function() {
             alert("خطأ: حسابك غير مسجل في قاعدة البيانات.");
         }
     } catch (error) {
-        alert("خطأ: " + error.message);
-
-       document.getElementById("loginBtn").addEventListener("click", validateLogin); 
+    
     }
 };
+
+document.getElementById("loginBtn").addEventListener("click", window.validateLogin);
