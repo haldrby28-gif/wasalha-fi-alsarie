@@ -1,22 +1,13 @@
-
-// استيراد الإعدادات
-import { auth } from "../firebase.js"; // تأكد من المسار الصحيح
-import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { auth } from "../firebase.js";
+import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 const db = getFirestore();
 
-// دالة تسجيل الدخول
-async function handleLogin() {
-    console.log("تم الضغط على الزر!"); // تظهر في Console
-    
+// الدالة الأساسية لتسجيل الدخول
+async function validateLogin() {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
-
-    if (!email || !password) {
-        alert("يرجى إدخال البريد الإلكتروني وكلمة المرور");
-        return;
-    }
 
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -28,7 +19,7 @@ async function handleLogin() {
             const userData = userDoc.data();
             const role = userData.role;
 
-            alert("أهلاً بك يا " + userData.name);
+            alert("أهلاً بك: " + userData.name);
 
             if (role === "admin") {
                 window.location.href = "admin-dashboard.html";
@@ -40,20 +31,18 @@ async function handleLogin() {
                 window.location.href = "home.html";
             }
         } else {
-            alert("خطأ: حسابك غير موجود في قاعدة بيانات الصلاحيات.");
+            alert("خطأ: حسابك غير مسجل في قاعدة بيانات الصلاحيات.");
         }
     } catch (error) {
-        alert("خطأ في تسجيل الدخول: " + error.message);
+        alert("خطأ: تأكد من البريد الإلكتروني وكلمة المرور.");
+        console.error(error.message);
     }
 }
 
-// ربط الزر بالجافاسكريبت (بدون الحاجة لـ onclick في الـ HTML)
+// ربط الزر برمجياً لضمان العمل مع نظام الموديولز
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("تم ربط الجافاسكريبت!"); // إذا ظهرت هذه في الـ Console، فالكود سليم
     const loginBtn = document.getElementById("loginBtn");
     if (loginBtn) {
-        loginBtn.addEventListener("click", handleLogin);
-    } else {
-        alert("خطأ: الزر غير موجود في الصفحة (تأكد من id=loginBtn)");
+        loginBtn.addEventListener("click", validateLogin);
     }
 });
