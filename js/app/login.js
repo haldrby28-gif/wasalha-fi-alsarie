@@ -1,3 +1,4 @@
+alert("login.js تم تحميله");
 import { auth } from "../firebase.js";
 import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
