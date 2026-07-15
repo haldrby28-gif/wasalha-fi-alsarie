@@ -1,43 +1,75 @@
-alert("login.js تم تحميله");
-import { auth } from "../firebase.js";
-import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+import { auth, db } from "../../js/firebase.js";
 
-const db = getFirestore();
+import {
+    signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-// ربط الدالة بـ window مباشرة لتكون متاحة للـ HTML
-window.validateLogin = async function() {
-    console.log("تم استدعاء الدالة بنجاح!");
-    const email = document.getElementById("email").value;
+import {
+    doc,
+    getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+async function validateLogin() {
+
+    const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
 
+    if (!email || !password) {
+        alert("يرجى إدخال البريد الإلكتروني وكلمة المرور.");
+        return;
+    }
+
     try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+        const userCredential = await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+
         const user = userCredential.user;
 
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        
-        if (userDoc.exists()) {
-            const userData = userDoc.data();
-            const role = userData.role;
+        const userSnap = await getDoc(doc(db, "users", user.uid));
 
-            alert("أهلاً بك: " + userData.name);
-
-            if (role === "admin") {
-                window.location.href = "admin-dashboard.html";
-            } else if (role === "restaurant") {
-                window.location.href = "restaurant-panel.html";
-            } else if (role === "driver") {
-                window.location.href = "driver-app.html";
-            } else {
-                window.location.href = "home.html";
-            }
-        } else {
-            alert("خطأ: حسابك غير مسجل في قاعدة البيانات.");
+        if (!userSnap.exists()) {
+            alert("هذا الحساب غير موجود في قاعدة البيانات.");
+            return;
         }
-    } catch (error) {
-    
-    }
-};
 
-document.getElementById("loginBtn").addEventListener("click", window.validateLogin);
+        const userData = userSnap.data();
+
+        switch (userData.role) {
+
+            case "admin":
+                window.location.href = "../admin/admin-dashboard.html";
+                break;
+
+            case "restaurant":
+                window.location.href = "../restaurant/restaurant-panel.html";
+                break;
+
+            case "driver":
+                window.location.href = "../driver/driver-app.html";
+                break;
+
+            case "user":
+                window.location.href = "home.html";
+                break;
+
+            default:
+                alert("صلاحية المستخدم غير صحيحة.");
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(error.message);
+
+    }
+
+}
+
+document
+    .getElementById("loginBtn")
+    .addEventListener("click", validateLogin);
