@@ -4,8 +4,9 @@ import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.
 
 const db = getFirestore();
 
-// الدالة الأساسية لتسجيل الدخول
-async function validateLogin() {
+// ربط الدالة بـ window مباشرة لتكون متاحة للـ HTML
+window.validateLogin = async function() {
+    console.log("تم استدعاء الدالة بنجاح!");
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
@@ -31,18 +32,9 @@ async function validateLogin() {
                 window.location.href = "home.html";
             }
         } else {
-            alert("خطأ: حسابك غير مسجل في قاعدة بيانات الصلاحيات.");
+            alert("خطأ: حسابك غير مسجل في قاعدة البيانات.");
         }
     } catch (error) {
-        alert("خطأ: تأكد من البريد الإلكتروني وكلمة المرور.");
-        console.error(error.message);
+        alert("خطأ: " + error.message);
     }
-}
-
-// ربط الزر برمجياً لضمان العمل مع نظام الموديولز
-document.addEventListener("DOMContentLoaded", () => {
-    const loginBtn = document.getElementById("loginBtn");
-    if (loginBtn) {
-        loginBtn.addEventListener("click", validateLogin);
-    }
-});
+};
