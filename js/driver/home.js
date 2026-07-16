@@ -59,6 +59,9 @@ onAuthStateChanged(auth, async (user) => {
 
 function loadOrders() {
 
+  function loadOrders() {
+function loadOrders() {
+
   const q = query(
     collection(db, "orders"),
     where("status", "==", "ready")
@@ -68,14 +71,38 @@ function loadOrders() {
 
     ordersContainer.innerHTML = "";
 
-  if (snapshot.empty) {
+    if (snapshot.empty) {
+      ordersContainer.innerHTML = `
+        <p style="text-align:center">
+          لا توجد طلبات جاهزة
+        </p>
+      `;
+      return;
+    }
 
-  ordersContainer.innerHTML = `
-    <p style="text-align:center">
-      لا توجد طلبات جاهزة
-    </p>
-  `;
+    snapshot.forEach((docSnap) => {
 
+      const order = docSnap.data();
+
+      ordersContainer.innerHTML += `
+        <div class="card">
+          <h3>📦 طلب جديد</h3>
+          <p><strong>العنوان:</strong> ${order.address || "-"}</p>
+          <p><strong>الإجمالي:</strong> ${order.total || 0} جنيه</p>
+
+          <button onclick="acceptOrder('${docSnap.id}')">
+            استلام الطلب
+          </button>
+
+        </div>
+      `;
+
+    });
+
+  });
+
+}
+  
   return;
 }
 
