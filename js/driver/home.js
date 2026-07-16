@@ -23,7 +23,7 @@ let currentDriverId = "";
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
-    window.location.href = "login.html";
+    location.href = "login.html";
     return;
   }
 
@@ -36,7 +36,7 @@ onAuthStateChanged(auth, async (user) => {
 
     if (!driverSnap.exists()) {
       alert("هذا الحساب ليس حساب مندوب");
-      window.location.href = "login.html";
+      location.href = "login.html";
       return;
     }
 
@@ -51,15 +51,12 @@ onAuthStateChanged(auth, async (user) => {
   } catch (err) {
 
     console.error(err);
-    alert("حدث خطأ أثناء تحميل البيانات");
+    alert("حدث خطأ أثناء تحميل بيانات المندوب");
 
   }
 
 });
 
-function loadOrders() {
-
-  function loadOrders() {
 function loadOrders() {
 
   const q = query(
@@ -72,22 +69,26 @@ function loadOrders() {
     ordersContainer.innerHTML = "";
 
     if (snapshot.empty) {
+
       ordersContainer.innerHTML = `
         <p style="text-align:center">
           لا توجد طلبات جاهزة
         </p>
       `;
+
       return;
     }
-
     snapshot.forEach((docSnap) => {
 
       const order = docSnap.data();
 
       ordersContainer.innerHTML += `
         <div class="card">
+
           <h3>📦 طلب جديد</h3>
+
           <p><strong>العنوان:</strong> ${order.address || "-"}</p>
+
           <p><strong>الإجمالي:</strong> ${order.total || 0} جنيه</p>
 
           <button onclick="acceptOrder('${docSnap.id}')">
@@ -102,35 +103,8 @@ function loadOrders() {
   });
 
 }
-  
-  return;
-}
 
-snapshot.forEach((docSnap) => {
-
-  const order = docSnap.data();
-
-  ordersContainer.innerHTML += `
-    <div class="card">
-
-      <h3>📦 طلب جديد</h3>
-
-      <p><strong>العنوان:</strong> ${order.address || "-"}</p>
-
-      <p><strong>الإجمالي:</strong> ${order.total || 0} جنيه</p>
-
-      <button onclick="acceptOrder('${docSnap.id}')">
-        استلام الطلب
-      </button>
-
-    </div>
-  `;
-
-});
-
-});
-
-window.acceptOrder = async function (orderId) {
+window.acceptOrder = async function(orderId) {
 
   try {
 
@@ -149,3 +123,4 @@ window.acceptOrder = async function (orderId) {
   }
 
 };
+             
