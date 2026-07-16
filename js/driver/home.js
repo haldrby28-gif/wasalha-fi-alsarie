@@ -122,4 +122,3 @@ window.acceptOrder = async function (orderId) {
   }
 
 };
-    }
