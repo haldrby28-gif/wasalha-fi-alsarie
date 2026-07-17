@@ -1,82 +1,117 @@
-console.log("بدأ تحميل login.js");
+import { auth, db } from "../firebase.js";
 
-alert("login.js يعمل");
-    console.log("Firebase Loaded", auth, db);
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
+import {
+    RecaptchaVerifier,
+    signInWithPhoneNumber
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    if (!email || !password) {
-        alert("يرجى إدخال البريد الإلكتروني وكلمة المرور");
+import {
+    doc,
+    getDoc,
+    setDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const phoneInput = document.getElementById("phone");
+const otpInput = document.getElementById("otp");
+
+const sendCodeBtn = document.getElementById("sendCodeBtn");
+const verifyBtn = document.getElementById("verifyBtn");
+
+const message = document.getElementById("message");
+
+// إنشاء reCAPTCHA
+window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+    size: "normal"
+});
+
+const appVerifier = window.recaptchaVerifier;
+
+// إرسال رمز التحقق
+sendCodeBtn.addEventListener("click", async () => {
+
+    const phone = phoneInput.value.trim();
+
+    if (phone === "") {
+        message.innerText = "أدخل رقم الهاتف";
         return;
     }
 
     try {
 
-        const userCredential = await signInWithEmailAndPassword(
+        const confirmation = await signInWithPhoneNumber(
             auth,
-            email,
-            password
+            phone,
+            appVerifier
         );
 
-        const user = userCredential.user;
+        window.confirmationResult = confirmation;
 
-        const userRef = doc(db, "users", user.uid);
+        otpInput.style.display = "block";
+        verifyBtn.style.display = "block";
 
-        const userSnap = await getDoc(userRef);
+        sendCodeBtn.style.display = "none";
 
-        if (!userSnap.exists()) {
-            alert("الحساب غير موجود في قاعدة البيانات");
-            return;
-        }
-
-        const userData = userSnap.data();
-
-        alert("مرحباً " + userData.name);
-
-        switch (userData.role) {
-
-            case "admin":
-                window.location.href = "../admin/dashboard.html";
-                break;
-
-            case "restaurant":
-                window.location.href = "../restaurant/dashboard.html";
-                break;
-
-            case "driver":
-                window.location.href = "../driver/index.html";
-                break;
-
-            default:
-                window.location.href = "home.html";
-                break;
-
-        }
+        message.innerText = "تم إرسال رمز التحقق.";
 
     } catch (error) {
 
         console.error(error);
 
-        alert("خطأ: " + error.message);
+        message.innerText = error.message;
 
     }
 
-}
+});
 
-document.addEventListener("DOMContentLoaded", () => {
+// التحقق من الرمز
+verifyBtn.addEventListener("click", async () => {
 
-    alert("login.js يعمل");
+    const code = otpInput.value.trim();
 
-    const btn = document.getElementById("loginBtn");
-
-    if (!btn) {
-        alert("الزر غير موجود");
+    if (code === "") {
+        message.innerText = "أدخل رمز التحقق";
         return;
     }
 
-    btn.addEventListener("click", () => {
-        alert("تم الضغط على الزر");
-        validateLogin();
-    });
+    try {
+
+        const result = await window.confirmationResult.confirm(code);
+
+        const user = result.user;
+
+        // إنشاء حساب إذا لم يكن موجودًا
+        const userRef = doc(db, "users", user.uid);
+
+        const snap = await getDoc(userRef);
+
+        if (!snap.exists()) {
+
+            await setDoc(userRef, {
+
+                uid: user.uid,
+
+                phone: user.phoneNumber,
+
+                role: "customer",
+
+                createdAt: serverTimestamp()
+
+            });
+
+        }
+
+        message.innerText = "تم تسجيل الدخول بنجاح";
+
+        // الانتقال للصفحة الرئيسية
+        window.location.href = "../app/home.html";
+
+    } catch (error) {
+
+        console.error(error);
+
+        message.innerText = "رمز التحقق غير صحيح";
+
+    }
 
 });
