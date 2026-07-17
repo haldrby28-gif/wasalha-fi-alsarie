@@ -1,15 +1,6 @@
-import { auth, db } from "../firebase.js";
-import {
-    signInWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+console.log("بدأ تحميل login.js");
 
-import {
-    doc,
-    getDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-async function validateLogin() {
-
+alert("login.js يعمل");
     console.log("Firebase Loaded", auth, db);
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
