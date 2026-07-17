@@ -74,8 +74,18 @@ async function validateLogin() {
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    document
-        .getElementById("loginBtn")
-        .addEventListener("click", validateLogin);
+    alert("login.js يعمل");
+
+    const btn = document.getElementById("loginBtn");
+
+    if (!btn) {
+        alert("الزر غير موجود");
+        return;
+    }
+
+    btn.addEventListener("click", () => {
+        alert("تم الضغط على الزر");
+        validateLogin();
+    });
 
 });
