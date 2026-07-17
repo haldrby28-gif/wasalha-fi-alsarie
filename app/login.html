@@ -1,48 +1,140 @@
-import { auth, db } from "../../js/firebase.js";
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 
-import {
-    RecaptchaVerifier,
-    signInWithPhoneNumber
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - وصلها في السريع</title>
 
-const phoneInput = document.getElementById("phone");
-const sendBtn = document.getElementById("sendCode");
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial,sans-serif;
+        }
 
-window.recaptchaVerifier = new RecaptchaVerifier(auth, "sendCode", {
-    size: "invisible"
-});
+        body{
+            background:#ff8c00;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+        }
 
-sendBtn.onclick = async () => {
-    const phone = phoneInput.value;
+        .login-container{
+            background:#fff;
+            width:90%;
+            max-width:400px;
+            padding:30px;
+            border-radius:20px;
+            box-shadow:0 5px 15px rgba(0,0,0,.2);
+            text-align:center;
+        }
 
-    try {
-        const confirmation = await signInWithPhoneNumber(
-            auth,
-            phone,
-            window.recaptchaVerifier
-        );
+        h2{
+            color:#ff8c00;
+            margin-bottom:10px;
+        }
 
-        window.confirmationResult = confirmation;
-        alert("تم إرسال رمز التحقق.");
-    } catch (e) {
-        alert(e.message);
-    }
-};
-const verifyBtn = document.getElementById("verify");
+        p{
+            color:#777;
+            margin-bottom:20px;
+        }
 
-verifyBtn.onclick = async () => {
-    const code = document.getElementById("otp").value;
+        input{
+            width:100%;
+            padding:15px;
+            border:1px solid #ddd;
+            border-radius:10px;
+            margin-bottom:15px;
+            font-size:16px;
+        }
 
-    try {
-        const result = await window.confirmationResult.confirm(code);
+        button{
+            width:100%;
+            padding:15px;
+            border:none;
+            border-radius:10px;
+            background:#ff8c00;
+            color:#fff;
+            font-size:17px;
+            cursor:pointer;
+            margin-top:10px;
+        }
 
-        const user = result.user;
+        button:hover{
+            background:#e67e22;
+        }
 
-        console.log(user.uid);
-        console.log(user.phoneNumber);
+        #verifyBtn{
+            display:none;
+        }
 
-        alert("تم تسجيل الدخول بنجاح");
-    } catch (e) {
-        alert("رمز التحقق غير صحيح");
-    }
-};
+        #otp{
+            display:none;
+        }
+
+        .register-link{
+            margin-top:20px;
+            font-size:15px;
+        }
+
+        .register-link a{
+            color:#ff8c00;
+            text-decoration:none;
+            font-weight:bold;
+        }
+
+        #message{
+            margin-top:15px;
+            color:#e67e22;
+            font-size:14px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="login-container">
+
+    <h2>وصلها في السريع</h2>
+
+    <p>سجل الدخول باستخدام رقم الهاتف</p>
+
+    <input
+        type="tel"
+        id="phone"
+        placeholder="+201001234567">
+
+    <input
+        type="text"
+        id="otp"
+        placeholder="أدخل رمز التحقق">
+
+    <button id="sendCodeBtn">
+        إرسال رمز التحقق
+    </button>
+
+    <button id="verifyBtn">
+        تسجيل الدخول
+    </button>
+
+    <div id="message"></div>
+
+    <div id="recaptcha-container"></div>
+
+    <div class="register-link">
+        ليس لديك حساب؟
+        <a href="register.html">
+            إنشاء حساب
+        </a>
+    </div>
+
+</div>
+
+<script type="module" src="../js/app/login.js"></script>
+
+</body>
+
+</html>
